@@ -129,3 +129,10 @@ dmypy.json
 .pyre/
 
 config.py
+YOURPRIVATE.key
+YOURPUBLIC.pem
+example.config.py
+logs
+reports/
+servicemans_dump.sql
+tests/
