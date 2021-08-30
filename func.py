@@ -1,21 +1,6 @@
 # !/usr/bin/python3
 # -*- coding: utf-8 -*
 
-# import email.message
-# import xmljson
-# import json
-# from json import dumps
-# from xmljson import badgerfish as bf
-# import random
-# from random import randint
-# import smtplib as smtp
-# from email.header import Header
-# from email.mime.text import MIMEText
-# from functools import wraps
-# from lxml.etree import fromstring, tostring
-# import urllib.parse
-# import requests
-# from requests.auth import HTTPBasicAuth
 import datetime
 import time
 import logging

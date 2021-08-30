@@ -3,7 +3,6 @@
 import telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler
 from telegram.ext import Filters, CallbackQueryHandler
-#from functools import wraps
 import func
 import config
 
