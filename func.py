@@ -76,8 +76,8 @@ def echo(bot, update):
                             or user.prev_msg in config.ch_host_list.keys()) and user.user_crm_info[user_id][
         'clean_data'] != '':
         # print(user.user_crm_info[user_id]['clean_data']['description'])
-        abon_phone = Helpers.get_abon_phone(user.user_crm_info[user_id]['clean_data'])
-        Helpers.crm_main_actions(bot, chat_id, crm_number, abon_phone)
+        abon_phones = Helpers.get_abon_phones(user.user_crm_info[user_id]['clean_data'])
+        Helpers.crm_main_actions(bot, chat_id, crm_number, abon_phones)
 
     if user.msg == 'Активация' and user_id in user.user_crm_info:
         Helpers.yes_no_menu(bot, chat_id, '<code>Подтвердите выбор</code>')
@@ -114,6 +114,16 @@ def callback_button(bot, update):
         else:
             text = 'Ошибка: ' + res['message']
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+
+    elif re.search(r'multi_phones_(\d)*', user.msg):
+        phones_list = user.msg.replace('multi_phones_', '').split(';')
+        print(phones_list)
+        txt = 'Выберите один из номеров, по которому хотите совершить вызов:'
+        call_data = {}
+        for key, phone in phones_list:
+            data_key = 'Номер' + key  # button text
+            call_data[data_key] = 'infinity_call_' + phone
+        Helpers.gen_inline_kb(call_data, txt)
 
     elif re.search(r'infinity_call_(\d)*', user.msg):
         text = 'Вы точно хотите позвонить абоненту?'

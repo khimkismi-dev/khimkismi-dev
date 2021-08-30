@@ -16,17 +16,21 @@ class Helpers(object):
     """class for helpers"""
 
     @staticmethod
-    def get_abon_phone(data):
-        try:
-            abon_phone = data['phone']  # crm_description.split("\n")[2]
-            abonent_phones = abon_phone.split(',')
-            if len(abonent_phones) <= 1:
-                abonent_phones = abon_phone.split(';')
-            abon_phone = abonent_phones[0]
-        except KeyError:
-            return ''
+    def get_abon_phones(data):
+        abonent_phones = data['phone']
+        for delimiter in config.phone_delimiters:
+            if data['phone'].find(delimiter) != -1:
+                abonent_phones = data['phone'].split(delimiter)
+        if not isinstance(abonent_phones, list):
+            try:
+                abonent_phones = data['phone'].split(',')
+            except AttributeError:
+                abonent_phones = ['']
 
-        return re.sub(r'\D', '', abon_phone)
+        abonent_phones = [str(phone) for phone in abonent_phones]
+        abonent_phones = [re.sub(r'\D', '', phone) for phone in abonent_phones]
+
+        return abonent_phones
 
     @staticmethod
     # главное меню
@@ -107,22 +111,29 @@ class Helpers(object):
 
     @staticmethod
     # клавиатура с основными действиями по задаче
-    def crm_main_actions(bot, chat_id, crm_num, abon_phone=''):
+    def crm_main_actions(bot, chat_id, crm_num, abon_phones=['']):
         crm_num = str(crm_num)
         text = 'Действия по задаче 👇' \
                '\n[Изменение истории], [Изменение ответств.], [Выполнить]'  # , [Фотоотчет]
-        if abon_phone != '':
-            text = text + ', [Позвонить]'
+
         btn_list = [
             telegram.InlineKeyboardButton(text="📝", callback_data="crm_" + crm_num + "_history_change"),
             telegram.InlineKeyboardButton(text="📣", callback_data="crm_" + crm_num + "_task_delegate"),
             # telegram.InlineKeyboardButton(text="📷", callback_data="crm_" + crm_num + "_task_photo"),
             telegram.InlineKeyboardButton(text="✅", callback_data="crm_" + crm_num + "_task_done"),
         ]
-        if abon_phone != '':
-            # добавить номер задачи в кнопку позвонить
-            # abon_phone = '89269423682' - тестовый номер "абонента" Иванов А.С.
-            btn_list.append(telegram.InlineKeyboardButton(text="📞", callback_data="infinity_call_" + abon_phone))
+
+        # abon_phone = '89269423682' - тестовый номер "абонента" Иванов А.С.
+        if abon_phones != ['']:
+            if len(abon_phones) == 1:
+                abon_phone = abon_phones[0]
+                phones_call_data = "infinity_call_" + abon_phone
+            else:
+                phones_call_data = 'multi_phones_' + ';'.join(abon_phones[4:])
+            text = text + ', [Позвонить]'
+            # TODO: добавить номер задачи в кнопку позвонить
+            btn_list.append(telegram.InlineKeyboardButton(text="📞", callback_data=phones_call_data))
+
         custom_keyboard = [btn_list]
         reply_keyboard = telegram.InlineKeyboardMarkup(custom_keyboard)
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
