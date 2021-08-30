@@ -21,6 +21,7 @@ class Helpers(object):
         for delimiter in config.phone_delimiters:
             if data['phone'].find(delimiter) != -1:
                 abonent_phones = data['phone'].split(delimiter)
+                break
         if not isinstance(abonent_phones, list):
             try:
                 abonent_phones = data['phone'].split(',')
