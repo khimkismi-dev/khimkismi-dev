@@ -117,13 +117,17 @@ def callback_button(bot, update):
 
     elif re.search(r'multi_phones_(\d)*', user.msg):
         phones_list = user.msg.replace('multi_phones_', '').split(';')
-        print(phones_list)
-        txt = 'Выберите один из номеров, по которому хотите совершить вызов:'
+        # print(phones_list)
+        txt = '<code>У абонента более 1 номера!</code> \nВыберите один из номеров, по которому хотите совершить вызов:'
         call_data = {}
-        for key, phone in phones_list:
-            data_key = 'Номер' + key  # button text
+        num = 0
+        for phone in phones_list:
+            num = num + 1
+            data_key = '📞 Номер_' + str(num)  # button text
             call_data[data_key] = 'infinity_call_' + phone
-        Helpers.gen_inline_kb(call_data, txt)
+        # print(call_data)
+        text, reply_markup = Helpers.gen_inline_kb(call_data, txt)
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'infinity_call_(\d)*', user.msg):
         text = 'Вы точно хотите позвонить абоненту?'

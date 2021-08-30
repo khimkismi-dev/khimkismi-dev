@@ -130,7 +130,8 @@ class Helpers(object):
                 abon_phone = abon_phones[0]
                 phones_call_data = "infinity_call_" + abon_phone
             else:
-                phones_call_data = 'multi_phones_' + ';'.join(abon_phones[4:])
+                phones_call_data = 'multi_phones_' + ';'.join(abon_phones[:4])
+                # print(phones_call_data)
             text = text + ', [Позвонить]'
             # TODO: добавить номер задачи в кнопку позвонить
             btn_list.append(telegram.InlineKeyboardButton(text="📞", callback_data=phones_call_data))
