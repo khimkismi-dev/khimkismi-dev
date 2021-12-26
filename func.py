@@ -312,9 +312,13 @@ def callback_button(update: Update, context: CallbackContext):
             #     user.users_property('last_msg', 'insert', call_data)
 
             if re.search(r'func_', call_data):
-                func_name = call_data
+                data_list = call_data.split('#')[0]
+                func_name = data_list[0]
+                additional_param = ''
+                if len(data_list) > 1:
+                    additional_param = data_list[1]
                 # user.users_property('last_msg', 'insert', func_name)
-                text = getattr(Helpers, call_data)(processing_tree, tree_queue)
+                text = getattr(Helpers, call_data)(processing_tree, tree_queue, additional_param)
 
                 if func_name == 'func_debt_processing_paid':
                     pay_method = re.search(r'Метод оплаты:\s+(\w+)', text, re.IGNORECASE)[1]
@@ -367,12 +371,12 @@ def photo(update: Update, context: CallbackContext):
             'crm_number') + '</b>?'
         Helpers.yes_no_menu(context.bot, chat_id, text)
 
-    elif re.search(r'func_\w+_processing_add_photo', user.prev_msg):
+    elif re.search(r'func_processing_add_photo#\w+', user.prev_msg):
         try:
-            processing_type = re.search(r'func_(\w+)_processing_add_photo', user.prev_msg)[1]
+            processing_type = re.search(r'func_processing_add_photo#(\w+)', user.prev_msg)[1]
         except Exception:
             processing_type = 'not found'
-        photo_name = config.processing_photo_list[processing_type]
+        photo_name = config.processing_photo_list[processing_type]['name']
         db = DB(db_config)
         f_id = update.message.photo[len(update.message.photo) - 1].file_id
         f_size = update.message.photo[len(update.message.photo) - 1].file_size
@@ -380,8 +384,8 @@ def photo(update: Update, context: CallbackContext):
                 VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
         db.sql_execute(query)
 
-        text = 'Вы хотите добавить данное фото в фотоотчет по задаче ' + '<b>' + user.users_property(
-            'crm_number') + '</b>?'
+        text = 'Вы хотите добавить данное фото <b>%s</b> в фотоотчет по задаче <b>%s</b>?' % \
+               (photo_name, user.users_property('crm_number'))
         Helpers.yes_no_menu(context.bot, chat_id, text)
 
 

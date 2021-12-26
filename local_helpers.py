@@ -230,8 +230,9 @@ class Helpers(object):
         return 'Введи сумму оплаты в текстовую строку. Метод оплаты: %s' % pay_method
 
     @staticmethod
-    def func_debt_processing_add_photo(tree_name, tree_queue):
-        return 'Отправь в чат фото оставленного уведомления'
+    def func_processing_add_photo(tree_name, tree_queue, additional_param):
+        text = config.processing_photo_list[additional_param]['text']
+        return text
 
     @staticmethod
     def unplug_processing(bot, chat_id, reply_markup, crm_number):
@@ -240,20 +241,20 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def func_unplug_processing_add_comment(tree_name, tree_queue):
+    def func_unplug_processing_add_comment(tree_name, tree_queue, additional_param):
         return 'Введите комментарий по выбранному действию:'
 
-    @staticmethod
-    def func_unplug_processing_add_photo_success(tree_name, tree_queue):
-        return 'Отправьте фото бирки в чат'
-
-    @staticmethod
-    def func_unplug_processing_add_photo_unsuccess1(tree_name, tree_queue):
-        return 'Отправьте фото слаботочного щитка / фото обрезанного кабеля у входа в квартиру'
-
-    @staticmethod
-    def func_unplug_processing_add_photo_unsuccess2(tree_name, tree_queue):
-        return 'Отправьте фото закрытого объекта'
+    # @staticmethod
+    # def func_unplug_processing_add_photo_success(tree_name, tree_queue):
+    #     return 'Отправьте фото бирки в чат'
+    #
+    # @staticmethod
+    # def func_unplug_processing_add_photo_unsuccess1(tree_name, tree_queue):
+    #     return 'Отправьте фото слаботочного щитка / фото обрезанного кабеля у входа в квартиру'
+    #
+    # @staticmethod
+    # def func_unplug_processing_add_photo_unsuccess2(tree_name, tree_queue):
+    #     return 'Отправьте фото закрытого объекта'
 
     @staticmethod
     def tree_handler(tree_name, tree_queue, crm_number):
