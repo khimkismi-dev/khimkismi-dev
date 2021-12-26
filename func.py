@@ -328,7 +328,7 @@ def callback_button(update: Update, context: CallbackContext):
                         if 'unplug_' not in user.users_property('report'):
                             Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                         if user.users_property('report') in ['unplug_not_connected', 'unplug_closed_object']:
-                            data = {'username': user.name, 'user_id': user_id}
+                            data = {'username': user.name, 'responsible': config.tech_department_supervisor, 'user_id': user_id}
                             Helpers.func_unplug_processing_finish(crm_number, data)
                 else:
                     text = '<b>Ошибка:</b> %s! Попробуйте повторить предыдущее действие заново.' % res['message']
