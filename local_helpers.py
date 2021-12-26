@@ -7,6 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 import config
+from local_bg import BG
 from local_db import DB, DBPsql
 
 db_config = config.db_config
@@ -239,6 +240,23 @@ class Helpers(object):
         call_data = Helpers.tree_handler('unplug_processing_tree', '0', crm_number)
         text, keyboard = Helpers.gen_inline_kb(call_data, '<code>Выберите действие:</code>', len(call_data))
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
+
+    @staticmethod
+    def func_unplug_processing_finish(crm_number, data):
+        res = BG.crm_ch_resp(crm_number, data['responsible'], data['username'], data['user_id'])
+        if res['code'] == 0:
+            text = 'Задача переведена на [%s]\n' % data['responsible']
+        else:
+            text = '<b>Ошибка при переводе задачи:</b> %s!\n' % res['message']
+
+        # перевод задачи в статус "отложена"
+        status = 'отложена'
+        res = BG.crm_ch_status(crm_number, status, data['username'], data['user_id'])
+        if res['code'] == 0:
+            text = text + 'Статус задачи <b>%s</b> изменен на <b>%s</b>\n' % (crm_number, status)
+        else:
+            text = text + '<b>Ошибка при изменении статуса задачи:</b> %s!\n' % res['message']
+        return text
 
     @staticmethod
     def func_processing_add_comment(tree_name, tree_queue, additional_param):

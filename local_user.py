@@ -263,6 +263,7 @@ class User:
         not_reg_kb = [[telegram.KeyboardButton('Регистрация')]]
         custom_keyboard = Helpers.main_menu()
         if self.is_reg():
+            print('prev_msg=' + self.prev_msg)
             # логика меню
             text = 'Выберите интересующий пункт:'
 
