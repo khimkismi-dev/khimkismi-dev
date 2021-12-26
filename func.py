@@ -381,9 +381,14 @@ def callback_button(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
-        crm_num = re.search(r'save_badge_number#(\d+)', user.prev_msg)[1]
+        # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
+        try:
+            crm_num = re.search(r'save_badge_number#(\d+)', user.prev_msg)[1]
+        except Exception:
+            text = 'Не выбрана задача!'
+            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         bg_id = user.users_property('bg_id')
-        contract_id = user.user_crm_info[user_id]['contract_id']
+        contract_id = user.user_crm_info[user_id]['clean_data']['contract']['title']
         badge_number = user.msg
         res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
         if res['code'] == 0:
