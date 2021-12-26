@@ -360,7 +360,7 @@ def callback_button(update: Update, context: CallbackContext):
                 text = getattr(Helpers, func_name)(processing_tree, tree_queue, additional_param)
                 # print(tree_queue)
                 if func_name == 'func_processing_debt_paid':
-                    pay_method = re.search(r'Метод оплаты:\s+(\w+)', text, re.IGNORECASE)[1]
+                    pay_method = re.search(r'Метод оплаты:\s+<b>(\w+)</b>', text, re.IGNORECASE)[1]
                     user.users_property('last_msg', 'insert', '%s#%s' % (func_name, pay_method))
                 else:
                     user.users_property('last_msg', 'insert', call_data)
