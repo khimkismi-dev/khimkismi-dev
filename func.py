@@ -8,7 +8,8 @@ import re
 import ssl
 import sys
 import telegram
-from telegram.ext import Filters, CallbackQueryHandler
+from telegram import Update
+from telegram.ext import Filters, CallbackQueryHandler, CallbackContext
 from telegram.ext import Updater, CommandHandler, MessageHandler
 
 import os
@@ -25,12 +26,14 @@ from local_db import DB, DBPsql
 # bg_config = copy.deepcopy(config.bg_config)
 db_config = config.db_config
 TOKEN = config.TOKEN
-updater = Updater(token=TOKEN)  # , request_kwargs={'proxy_url': 'socks5://51.15.83.215:1080'}, workers=0) #proxy
+updater = Updater(token=TOKEN, use_context=True)
+# , request_kwargs={'proxy_url': 'socks5://51.15.83.215:1080'}, workers=0) #proxy
 dispatcher = updater.dispatcher
 
 
 # обработчик /start
-def start(bot, update):
+def start(update: Update, context: CallbackContext):
+    job = context.job
     # указываем отправленную пользователем команду для записи в лог
     command = "/start"
     chat_id = update.message.chat_id
@@ -43,7 +46,7 @@ def start(bot, update):
     user.users_property('last_msg', 'insert')
     text, reply_markup = user.menu()
 
-    bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+    context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
 
 # ф-ия-обработчик сообщений от пользователя
