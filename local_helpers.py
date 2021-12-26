@@ -216,7 +216,7 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def func_debt_processing_paid(tree_name, tree_queue):
+    def func_debt_processing_paid(tree_name, tree_queue, additional_param):
         # print('from func_debt_processing_paid(): ')
         # print(tree_queue)
 
