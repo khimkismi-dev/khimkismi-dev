@@ -250,6 +250,8 @@ def callback_button(update: Update, context: CallbackContext):
 
     elif user.msg == 'Нет':
         text = '<code>Вы отменили предыдущее действие!</code>'
+        if user.users_property('report') == 'unplug_badge':
+            user.users_property('report', 'insert', ' ')
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'send_photo|send_document', user.prev_msg) and user.msg == 'Да':
@@ -292,7 +294,8 @@ def callback_button(update: Update, context: CallbackContext):
                     if key is None:
                         context.bot.send_message(chat_id=user.chat_id, text='<code>ДОБАВЛЕНО</code>', parse_mode='HTML')
                     else:
-                        context.bot.send_message(chat_id=chat_id, text='<code>Данные сохранены</code>', parse_mode='HTML')
+                        txt = '<code>Данные сохранены</code>'
+                        context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
                         Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                 else:
                     text = res['message']
@@ -318,9 +321,8 @@ def callback_button(update: Update, context: CallbackContext):
                 if len(data_list) > 1:
                     additional_param = data_list[1]
                 # user.users_property('last_msg', 'insert', func_name)
-                print(func_name)
-                print('\n')
-                print(additional_param)
+                # print(func_name)
+                # print(additional_param)
                 text = getattr(Helpers, func_name)(processing_tree, tree_queue, additional_param)
 
                 if func_name == 'func_debt_processing_paid':
@@ -333,7 +335,7 @@ def callback_button(update: Update, context: CallbackContext):
 
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         else:
-            print(call_data)
+            # print(call_data)
             menu_col_count = 1 if len(call_data) >= 3 else len(call_data)
             separator = '------------------'
             text, reply_keyboard = Helpers.gen_inline_kb(call_data, '<code>%s\nВыберите действие:</code>' % separator,
@@ -341,6 +343,28 @@ def callback_button(update: Update, context: CallbackContext):
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
     # elif re.search(r'debt_processing_tree#(\d)*#(\d)', user.prev_msg):
     #     pass
+    elif re.search(r'save_badge_number#(\d+)', user.msg):
+        text = 'Введите номер бирки'
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+    elif re.search(r'save_badge_number#(\d+)', user.prev_msg):
+        contract_id = user.user_crm_info[user_id]['contract_id']
+        badge_number = user.msg
+        text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
+               (badge_number, contract_id)
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+    elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
+        crm_num = re.search(r'save_badge_number#(\d+)', user.prev_msg)[1]
+        bg_id = user.users_property('bg_id')
+        contract_id = user.user_crm_info[user_id]['contract_id']
+        badge_number = user.msg
+        res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
+        if res['code'] == 0:
+            text = '<code>Номер бирки сохранён!</code>'
+            user.users_property('report', 'insert', ' ')
+            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+        else:
+            text = '<b>Ошибка сохранения номера бирки!</b> Попробуйте повторить предыдущее действие'
+            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
     else:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
@@ -370,8 +394,7 @@ def photo(update: Update, context: CallbackContext):
         VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
         db.sql_execute(query)
 
-        text = 'Вы хотите добавить данное фото в фотоотчет по задаче ' + '<b>' + user.users_property(
-            'crm_number') + '</b>?'
+        text = 'Вы хотите добавить данное фото в фотоотчет по задаче <b>%s</b>?' % user.users_property('crm_number')
         Helpers.yes_no_menu(context.bot, chat_id, text)
 
     elif re.search(r'func_processing_add_photo#\w+', user.prev_msg):
@@ -387,9 +410,15 @@ def photo(update: Update, context: CallbackContext):
                 VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
         db.sql_execute(query)
 
-        text = 'Вы хотите добавить данное фото <b>%s</b> в фотоотчет по задаче <b>%s</b>?' % \
+        text = 'Вы точно хотите добавить данное фото <b>"%s"</b> в фотоотчет по задаче <b>%s</b>?' % \
                (photo_name, user.users_property('crm_number'))
         Helpers.yes_no_menu(context.bot, chat_id, text)
+        if processing_type == 'unplug_badge':
+            user.users_property('report', 'insert', processing_type)
+            text = 'также выберите действие:'
+            call_data = {'Указать номер бирки': 'save_badge_number#%s' % user.users_property('crm_number')}
+            text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
+            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
 
 
 def document(update: Update, context: CallbackContext):

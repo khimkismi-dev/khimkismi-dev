@@ -245,3 +245,10 @@ class BG(object):
         endpoint = "/api/?action=WorkAdd&taskId=%s&wid=%s&count=%s&responsible=%s&userId=%d" % \
                    (crm_num, work_id, count, str_resp, bg_id)
         return Helpers.send_request(bg_config, endpoint, user_id)
+
+    @staticmethod
+    # проставление работ по задаче
+    def save_badge(crm_num, user_id, bg_id, contract_id, badge_number):
+        endpoint = "/api/?action=SetTagNumber&userId=%s&cid=%s&tagNumber=%s" % \
+                   (bg_id, contract_id, badge_number)
+        return Helpers.send_request(bg_config, endpoint, user_id)
