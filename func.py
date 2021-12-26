@@ -42,6 +42,8 @@ def start(update: Update, context: CallbackContext):
     Helpers.logger(user_id, command)
 
     user = User('users', user_id, chat_id, command)
+    # refresh field report
+    user.users_property('report', 'insert', ' ')
     # user.set_last_msg()
     user.users_property('last_msg', 'insert')
     text, reply_markup = user.menu()
@@ -59,6 +61,8 @@ def echo(update: Update, context: CallbackContext):
     Helpers.logger(user_id, msg)
 
     user = User('users', user_id, chat_id, msg)
+    # refresh field report
+    user.users_property('report', 'insert', ' ')
     user.prev_msg = user.users_property('last_msg')
     user.users_property('last_msg', 'insert')
     # print(user.user_state())
@@ -144,6 +148,8 @@ def callback_button(update: Update, context: CallbackContext):
     Helpers.logger(user_id, call.data)
 
     user = User('users', user_id, chat_id, call.data)
+    # refresh field report
+    user.users_property('report', 'insert', ' ')
     user.prev_msg = user.users_property('last_msg')
 
     user.users_property('last_msg', 'insert')
