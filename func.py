@@ -120,11 +120,11 @@ def echo(update: Update, context: CallbackContext):
         to_history = user.msg
         res = BG.crm_add_comment(crm_number, to_history, user.users_property('name'), user_id)
         if res['code'] == 0:
-            user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
             user.user_crm_info[user_id]['crm_number'] = crm_number
             text = 'Комментарий добавлен!\n'
             data = {'username': user.users_property('name'), 'responsible': config.tech_department_supervisor, 'user': user}
             text = text + Helpers.func_unplug_processing_finish(crm_number, data)
+            user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
         else:
             text = '<b>Ошбика добавления комментария!</b> Попробуйте повторить предыдущее действие'
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
@@ -330,6 +330,7 @@ def callback_button(update: Update, context: CallbackContext):
                         if user.users_property('report') in ['unplug_not_connected', 'unplug_closed_object']:
                             data = {'username': user.name, 'responsible': config.tech_department_supervisor, 'user': user}
                             txt = Helpers.func_unplug_processing_finish(crm_number, data)
+                            user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
                             context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
                 else:
                     text = '<b>Ошибка:</b> %s! Попробуйте повторить предыдущее действие заново.' % res['message']
