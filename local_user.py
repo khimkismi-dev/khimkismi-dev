@@ -389,7 +389,8 @@ class User:
                 if self.user_id not in self.user_crm_info:
                     text = 'Пожалуйста, для начала выберите пункт <b>"CRM"</b> '  # + ' или <b>"Последняя в работе"</b>'
                 else:
-                    self.crm_number = self.user_crm_info[self.user_id]['crm_number']
+                    self.crm_number = self.user_crm_info[self.user_id]['crm_number'] \
+                        if self.user_id in self.user_crm_info.keys() else self.users_property('crm_number')
                     text = self.user_crm_info[self.user_id]['history'].replace('\n\n\n', '\n\n')
                     if text == '' or text is None:
                         text = 'История по задаче <b>{crm_number}</b> не найдена!'.format(crm_number=self.crm_number)
