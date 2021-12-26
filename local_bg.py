@@ -5,7 +5,7 @@ import urllib.parse
 import copy
 
 import config
-from local_helpers import Helpers
+import local_helpers
 
 bg_config = copy.deepcopy(config.bg_config)
 
@@ -21,7 +21,7 @@ class BG(object):
     # проверка зарегистрирован ли пользователь с указанным email в BG
     def check_mail(mail, user_id):
         endpoint = '/api/?action=User&email=' + mail.lower()
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # присваиваем данные, полученные из БГ (CRM), согласно ключам из шаблона + кастом
@@ -86,7 +86,7 @@ class BG(object):
     # полная информация по задаче
     def crm_info(crm_num, user_id):
         endpoint = '/api/?action=Task&taskId=' + str(crm_num)
-        crm_info = Helpers.send_request(bg_config, endpoint, user_id)
+        crm_info = local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
         # print(crm_info)
 
         result = {
@@ -120,39 +120,39 @@ class BG(object):
         else:
             result['text'] = crm_info['message']
 
-        return result  # Helpers.send_request(bg_config, endpoint)
+        return result  # local_helpers.Helpers.send_request(bg_config, endpoint)
 
     @staticmethod
     # изменение статуса задачи
     def crm_ch_status(crm_num, status, user, user_id):
         endpoint = '/api/?action=ChangeTaskStatus&taskId=' + str(crm_num) + '&status=' + status + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # добавление комментария по задаче
     def crm_add_comment(crm_num, comment, user, user_id):
         comment = urllib.parse.quote_plus(comment)  # декодируем спецсимволы
         endpoint = '/api/?action=AppendComment&taskId=' + str(crm_num) + '&message=' + comment + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # изменение ответственной группы по задаче
     def crm_ch_group(crm_num, group_name, user, user_id):
         endpoint = '/api/?action=ChangeGroup&taskId=' + str(crm_num) + '&group=' + group_name + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # изменение ответственного по задаче
     def crm_ch_resp(crm_num, resp_user, user, user_id):
         endpoint = '/api/?action=ChangeResponsible&taskId=' + str(crm_num) + \
                    '&responsible=' + resp_user + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # получение списка чекпоинтов по задаче
     def get_checkpoint_list(crm_num, user_id):
         endpoint = '/api/?action=CheckPointList&tid=' + crm_num
-        resp_data = Helpers.send_request(bg_config, endpoint, user_id)
+        resp_data = local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
         checkpoint_list = []
         if 'data' in resp_data:
             for item in resp_data['data']['check_list']:
@@ -165,19 +165,19 @@ class BG(object):
     # проставление чек-поинта по задаче
     def crm_set_checkpoint(crm_num, check_point, user, user_id):
         endpoint = '/api/?action=SetCheckPoint&taskId=' + str(crm_num) + '&check_point=' + check_point + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # активация абонента
     def ab_activate(contract_num, user, user_id):
         endpoint = '/api/?action=SubscriberActivation&contract_number=' + contract_num + '&user=' + user
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # получение списка групп
     def get_group_list(user_id):
         endpoint = '/api/?action=GroupList'
-        resp_data = Helpers.send_request(bg_config, endpoint, user_id)
+        resp_data = local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
         group_list = []
         if 'data' in resp_data:
             for item in resp_data['data']:
@@ -188,7 +188,7 @@ class BG(object):
     # получение списка ссылок, прикрепленных к задаче
     def get_url_list(crm_num, user_id):
         endpoint = '/api/?action=WebLinkList&taskId=' + str(crm_num)
-        resp_data = Helpers.send_request(bg_config, endpoint, user_id)
+        resp_data = local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
         url_list = []
         if 'data' in resp_data:
             for item in resp_data['data']:
@@ -208,26 +208,26 @@ class BG(object):
                 ]
             }
         }
-        return Helpers.send_request(bg_config, endpoint, user_id, send_data)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id, send_data)
 
     @staticmethod
     # получение результатов тестирования кабеля по номеру задачи
     def get_cable_test(crm_num, user_id):
         endpoint = '/api/?action=VirtualCableTest&taskId=' + str(crm_num)
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # получение активных задач пользователя
     def get_active_tasks(user_id, bg_id):
         endpoint = '/api/?action=GetActiveTasks&userId=' + str(bg_id)
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # получение списка работ по задаче
     def get_work_list(crm_num, user_id):
         endpoint = '/api/?action=WorkList&taskId=' + str(crm_num)
 
-        resp_data = Helpers.send_request(bg_config, endpoint, user_id)
+        resp_data = local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
         work_list = {}
         if 'data' in resp_data:
             for item in resp_data['data']:
@@ -244,11 +244,11 @@ class BG(object):
         str_resp = ",".join(resp_ids)
         endpoint = "/api/?action=WorkAdd&taskId=%s&wid=%s&count=%s&responsible=%s&userId=%d" % \
                    (crm_num, work_id, count, str_resp, bg_id)
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
     # проставление работ по задаче
     def save_badge(crm_num, user_id, bg_id, contract_id, badge_number):
         endpoint = "/api/?action=SetTagNumber&userId=%s&cid=%s&tagNumber=%s" % \
                    (bg_id, contract_id, badge_number)
-        return Helpers.send_request(bg_config, endpoint, user_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)

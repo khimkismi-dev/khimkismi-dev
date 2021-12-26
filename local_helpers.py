@@ -7,7 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 import config
-# from local_bg import BG
+from local_bg import BG
 from local_db import DB, DBPsql
 
 db_config = config.db_config
