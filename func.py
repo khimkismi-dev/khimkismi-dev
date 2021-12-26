@@ -62,7 +62,7 @@ def echo(update: Update, context: CallbackContext):
 
     user = User('users', user_id, chat_id, msg)
     # refresh field report
-    user.users_property('report', 'insert', ' ')
+    # user.users_property('report', 'insert', ' ')
     user.prev_msg = user.users_property('last_msg')
     user.users_property('last_msg', 'insert')
     # print(user.user_state())
@@ -130,7 +130,7 @@ def echo(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'save_badge_number#(\d+)', user.prev_msg):
-        contract_id = user.user_crm_info[user_id]['contract_id']
+        contract_id = user.user_crm_info[user_id]['contract']['title']
         badge_number = user.msg
         text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
                (badge_number, contract_id)
