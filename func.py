@@ -392,6 +392,7 @@ def callback_button(update: Update, context: CallbackContext):
             contract_id = badge_number = None
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
+        print(res)
         if res['code'] == 0:
             text = '<code>Номер бирки сохранён!</code>'
             user.users_property('report', 'insert', ' ')
