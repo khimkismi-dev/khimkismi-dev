@@ -384,13 +384,11 @@ def callback_button(update: Update, context: CallbackContext):
         # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
         crm_num = user.users_property('crm_number')
         bg_id = user.users_property('bg_id')
+        badge_number = user.msg
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['title']
-            badge_number = user.msg
         except Exception:
-            text = 'Не выбрана задача!'
-            contract_id = badge_number = None
-            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+            contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['title']
         res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
         print(res)
         if res['code'] == 0:
@@ -398,7 +396,7 @@ def callback_button(update: Update, context: CallbackContext):
             user.users_property('report', 'insert', ' ')
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         else:
-            text = '<b>Ошибка сохранения номера бирки!</b> Попробуйте повторить предыдущее действие'
+            text = '<b>Ошибка сохранения номера бирки: %s!</b> Попробуйте повторить предыдущее действие' % res['message']
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
     else:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
@@ -445,11 +443,13 @@ def photo(update: Update, context: CallbackContext):
                 VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
         db.sql_execute(query)
 
-        text = 'Вы точно хотите добавить данное фото <b>"%s"</b> в фотоотчет по задаче <b>%s</b>?' % \
+        text = 'Вы точно хотите добавить фото: <b>"%s"</b> в фотоотчет по задаче <b>%s</b>?' % \
                (photo_name, user.users_property('crm_number'))
         Helpers.yes_no_menu(context.bot, chat_id, text)
-        if processing_type == 'unplug_badge':
+
+        if processing_type in ['unplug_badge', 'unplug_not_connected', 'unplug_closed_object']:
             user.users_property('report', 'insert', processing_type)
+        if processing_type == 'unplug_badge':
             text = 'затем выберите действие:'
             call_data = {'Указать номер бирки': 'save_badge_number#%s' % user.users_property('crm_number')}
             text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
