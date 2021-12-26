@@ -291,7 +291,7 @@ class User:
                 else:
                     text = 'Некорректный ввод, попробуйте заново!'
 
-            elif re.search(r'func_debt_processing_paid#\w+', self.prev_msg):
+            elif re.search(r'func_processing_debt_paid#\w+', self.prev_msg):
                 if Helpers.is_number(self.msg.replace(',', '.')):
                     paid_sum = self.msg.replace(',', '.')
                     # print('paid_sum=%s\n' % paid_sum)
@@ -299,7 +299,7 @@ class User:
                     try:
                         user_name = self.users_property('name')
                         crm_number = self.users_property('crm_number')
-                        pay_method = re.search(r'func_debt_processing_paid#(\w+)', self.prev_msg)[1]
+                        pay_method = re.search(r'func_processing_debt_paid#(\w+)', self.prev_msg)[1]
                         comment = 'Оплачено: %s\nСпособ оплаты: %s' % (paid_sum, pay_method)
                         crm_add_comment_res = BG.crm_add_comment(crm_number, comment, user_name, self.user_id)
                         if crm_add_comment_res['code'] == 0:

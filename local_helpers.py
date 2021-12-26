@@ -7,7 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 import config
-from local_bg import BG
+# from local_bg import BG
 from local_db import DB, DBPsql
 
 db_config = config.db_config
@@ -217,13 +217,13 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def func_debt_processing_paid(tree_name, tree_queue, additional_param):
-        # print('from func_debt_processing_paid(): ')
+    def func_processing_debt_paid(tree_name, tree_queue, additional_param):
+        # print('from func_processing_debt_paid(): ')
         # print(tree_queue)
 
         items = Helpers.get_recursive(getattr(config, tree_name), tree_queue[:-4])  # 2 points back ex.: .1.1
         pay_method = 'НЕ ОПРЕДЕЛЁН!'
-        # print('from func_debt_processing_paid(): ')
+        # print('from func_processing_debt_paid(): ')
         # print(items)
         for item in items:
             if tree_queue[-1:] == item[:1]:
