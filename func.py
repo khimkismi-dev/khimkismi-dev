@@ -120,7 +120,8 @@ def echo(update: Update, context: CallbackContext):
         to_history = user.msg
         res = BG.crm_add_comment(crm_number, to_history, user.users_property('name'), user_id)
         if res['code'] == 0:
-            user.user_crm_info[user_id]['crm_number'] = crm_number
+            if user_id not in user.user_crm_info.keys():
+                user.user_crm_info.update({'crm_number': crm_number})
             text = 'Комментарий добавлен!\n'
             data = {'username': user.users_property('name'), 'responsible': config.tech_department_supervisor, 'user': user}
             text = text + Helpers.func_unplug_processing_finish(crm_number, data)
