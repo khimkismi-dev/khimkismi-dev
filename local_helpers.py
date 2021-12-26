@@ -228,9 +228,9 @@ class Helpers(object):
         # print('from func_processing_debt_paid(): ')
         # print(items)
         for item in items:
-            if tree_queue[-1:] == item[:1]:
+            if tree_queue[-3] == item[:1]:
                 pay_method = item[2:]
-        return 'Введи сумму оплаты в текстовую строку. Метод оплаты: %s' % pay_method
+        return 'Введи сумму оплаты в текстовую строку. Метод оплаты: <b>%s</b>' % pay_method
 
     @staticmethod
     def func_processing_add_photo(tree_name, tree_queue, additional_param):

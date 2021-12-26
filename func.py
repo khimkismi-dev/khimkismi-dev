@@ -358,7 +358,7 @@ def callback_button(update: Update, context: CallbackContext):
                 # print(func_name)
                 # print(additional_param)
                 text = getattr(Helpers, func_name)(processing_tree, tree_queue, additional_param)
-
+                # print(tree_queue)
                 if func_name == 'func_processing_debt_paid':
                     pay_method = re.search(r'Метод оплаты:\s+(\w+)', text, re.IGNORECASE)[1]
                     user.users_property('last_msg', 'insert', '%s#%s' % (func_name, pay_method))
@@ -391,7 +391,7 @@ def callback_button(update: Update, context: CallbackContext):
         except Exception:
             contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['title']
         res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
-        print(res)
+        # print(res)
         if res['code'] == 0:
             text = '<code>Номер бирки сохранён!</code>'
             user.users_property('report', 'insert', ' ')
