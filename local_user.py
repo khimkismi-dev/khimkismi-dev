@@ -300,7 +300,7 @@ class User:
                         user_name = self.users_property('name')
                         crm_number = self.users_property('crm_number')
                         pay_method = re.search(r'func_processing_debt_paid#(\w+)', self.prev_msg)[1]
-                        comment = 'Оплачено: %s\nСпособ оплаты: %s' % (paid_sum, pay_method)
+                        comment = 'Оплачено: %s\nСпособ оплаты: %s\n' % (paid_sum, pay_method)
                         crm_add_comment_res = BG.crm_add_comment(crm_number, comment, user_name, self.user_id)
                         if crm_add_comment_res['code'] == 0:
                             text = '<code>В задачу %s Добавлен комментарий: </code>\n%s' % (crm_number, comment)
