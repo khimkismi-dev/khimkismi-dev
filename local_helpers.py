@@ -229,7 +229,7 @@ class Helpers(object):
         # print(items)
         for item in items:
             if tree_queue[-3] == item[:1]:
-                pay_method = item[2:]
+                pay_method = item[3:]
         return 'Введи сумму оплаты в текстовую строку. Метод оплаты: <b>%s</b>' % pay_method
 
     @staticmethod
