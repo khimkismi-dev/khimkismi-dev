@@ -288,7 +288,7 @@ def callback_button(update: Update, context: CallbackContext):
             if crm_number:
                 res = BG.post_url_to_task(crm_number, user_id, url, description)
                 if res['code'] == 0:
-                    key = next((k for k in config.processing_photo_list if config.processing_photo_list[k] == description), None)
+                    key = next((k for k in config.processing_photo_list if config.processing_photo_list[k]['name'] == description), None)
                     if key is None:
                         context.bot.send_message(chat_id=user.chat_id, text='<code>ДОБАВЛЕНО</code>', parse_mode='HTML')
                     else:
