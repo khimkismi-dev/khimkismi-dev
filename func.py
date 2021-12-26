@@ -111,6 +111,18 @@ def echo(update: Update, context: CallbackContext):
         text = '<code>Некорректный ввод кол-ва работ!</code>'
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
+    elif re.search(r'func_processing_add_comment', user.prev_msg):
+        crm_number = user.users_property('crm_number')
+        to_history = user.msg
+        res = BG.crm_add_comment(crm_number, to_history, user.users_property('name'), user_id)
+        if res['code'] == 0:
+            user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
+            user.user_crm_info[user_id]['crm_number'] = crm_number
+            text = 'Комментарий добавлен!'
+        else:
+            text = '<b>Ошбика добавления комментария!</b>'
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+
 
 # ф-ия, обработчик нажатий inline-кнопок
 def callback_button(update: Update, context: CallbackContext):

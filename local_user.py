@@ -543,6 +543,7 @@ class User:
                         'открыта': 'crm_' + str(crm_num) + '_task_open',
                         'выполнена': 'crm_' + str(crm_num) + '_task_done',
                         'закрыта': 'crm_' + str(crm_num) + '_task_close',
+                        'отложена': 'crm_' + str(crm_num) + '_task_suspend'
                     }
                     text, inline_kb = Helpers.gen_inline_kb(status_list)
                 else:
