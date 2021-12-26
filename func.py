@@ -123,7 +123,7 @@ def echo(update: Update, context: CallbackContext):
             user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
             user.user_crm_info[user_id]['crm_number'] = crm_number
             text = 'Комментарий добавлен!\n'
-            data = {'username': user.name, 'responsible': config.tech_department_supervisor, 'user': user}
+            data = {'username': user.users_property('name'), 'responsible': config.tech_department_supervisor, 'user': user}
             text = text + Helpers.func_unplug_processing_finish(crm_number, data)
         else:
             text = '<b>Ошбика добавления комментария!</b> Попробуйте повторить предыдущее действие'
