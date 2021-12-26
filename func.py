@@ -327,7 +327,7 @@ def callback_button(update: Update, context: CallbackContext):
                     pay_method = re.search(r'Метод оплаты:\s+(\w+)', text, re.IGNORECASE)[1]
                     user.users_property('last_msg', 'insert', '%s#%s' % (func_name, pay_method))
                 else:
-                    user.users_property('last_msg', 'insert', func_name)
+                    user.users_property('last_msg', 'insert', call_data)
             else:
                 text = 'действие не задано!'
 
