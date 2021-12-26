@@ -381,7 +381,7 @@ def callback_button(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
-        # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
+        print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
         try:
             crm_num = re.search(r'save_badge_number#(\d+)', user.prev_msg)[1]
         except Exception:
