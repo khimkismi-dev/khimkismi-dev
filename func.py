@@ -333,7 +333,7 @@ def callback_button(update: Update, context: CallbackContext):
 
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         else:
-            # print(call_data)
+            print(call_data)
             menu_col_count = 1 if len(call_data) >= 3 else len(call_data)
             separator = '------------------'
             text, reply_keyboard = Helpers.gen_inline_kb(call_data, '<code>%s\nВыберите действие:</code>' % separator,

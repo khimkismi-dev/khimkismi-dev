@@ -264,8 +264,9 @@ class Helpers(object):
         buttons = Helpers.get_recursive(actions_tree, tree_queue)
 
         callback_keyboard = {}
-        if isinstance(buttons, str) and re.search(r'func_%s' % tree_name.replace('_tree', ''), buttons):
-            func_name = buttons
+        # print(buttons)
+        if isinstance(buttons, str) and re.search(r'func_processing', buttons):
+            func_name = buttons.split('#')[0]
             return func_name
         for item in buttons:
             btn_text = item[2:]
