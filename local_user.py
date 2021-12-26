@@ -81,7 +81,7 @@ class User:
             db = DBPsql(config.db_inf_config)
             crm_number = self.users_property('crm_number')
             add_call_query = """INSERT INTO "%s" ("ID", abonent_phone, serviceman_phone, crm) VALUES (%d, '%s', '%s', '%s')""" % (
-            target_table, next_id, abonent_phone, user_phone, crm_number)
+                target_table, next_id, abonent_phone, user_phone, crm_number)
             db.sql_execute(add_call_query)
             return "<code>В течение 1 минуты ожидайте звонка от Инфинити и соединения с абонентом!</code>"
 
@@ -284,9 +284,37 @@ class User:
                     self.users_property('crm_number', 'insert')
                     self.user_crm_info[self.user_id] = BG.crm_info(self.crm_number, self.user_id)
                     self.user_crm_info[self.user_id]['crm_number'] = self.crm_number
-                    text = self.user_crm_info[self.user_id]['text']
+                    host_str = '<code>(Провайдер: %s)</code>\n' % \
+                               (config.provider_names[config.ch_host_list[self.prev_msg]])
+                    text = host_str + self.user_crm_info[self.user_id]['text']
                 else:
                     text = 'Некорректный ввод, попробуйте заново!'
+
+            elif re.search(r'func_debt_processing_paid#\w+', self.prev_msg):
+                if Helpers.is_number(self.msg.replace(',', '.')):
+                    paid_sum = self.msg.replace(',', '.')
+                    # print('paid_sum=%s\n' % paid_sum)
+                    # print(self.prev_msg)
+                    try:
+                        user_name = self.users_property('name')
+                        crm_number = self.users_property('crm_number')
+                        pay_method = re.search(r'func_debt_processing_paid#(\w+)', self.prev_msg)[1]
+                        comment = 'Оплачено: %s\nСпособ оплаты: %s' % (paid_sum, pay_method)
+                        crm_add_comment_res = BG.crm_add_comment(crm_number, comment, user_name, self.user_id)
+                        if crm_add_comment_res['code'] == 0:
+                            text = '<code>В задачу %s Добавлен комментарий: </code>\n%s' % (crm_number, comment)
+                            crm_ch_status_res = BG.crm_ch_status(crm_number, 'выполнена', user_name, self.user_id)
+                            if crm_ch_status_res['code'] == 0:
+                                text = text + '\n<code>Статус задачи %s изменен на "выполнена"</code>' % crm_number
+                            self.user_crm_info[self.user_id] = BG.crm_info(self.crm_number, self.user_id)
+                            self.user_crm_info[self.user_id]['crm_number'] = self.crm_number
+                        else:
+                            text = '<code>Ошибка добавления комментария: %s</code>' % crm_add_comment_res['message']
+                    except Exception:
+                        text = '<code>Не определен способ оплаты!</code>'
+                else:
+                    text = '<b>Некорректный ввод!</b>\n' \
+                           '<code>Попробуйте выбрать предыдущее действие и повторить ввод заново!</code>'
 
             elif self.msg == 'Активация':
                 if self.user_id in self.user_crm_info and self.user_crm_info[self.user_id]:
@@ -315,10 +343,33 @@ class User:
                 else:
                     text = '<code>Для начала работы выберите пункт "CRM"!</code>'
 
+            elif self.msg == 'Добавить работы':
+                crm_num = self.users_property('crm_number')
+                if crm_num:
+                    work_list = BG.get_work_list(crm_num, self.user_id)
+                    call_data = {}
+                    text = already_added = ""
+                    if len(work_list):
+                        for work_id, info in work_list.items():
+                            if info['already_added'] != "0":
+                                work_txt = '\nРабота: <code>%s</code> \nКол-во: <code>%s</code>\n' % \
+                                           (info['url'], info['already_added'])
+                                already_added = already_added + work_txt
+                            call_data[info['url'][:64]] = 'add_work_{}_{}'.format(work_id, crm_num)  # 64 symbols limit
+
+                        if len(already_added):
+                            text = 'Список уже добавленных работ:\n' + already_added
+
+                        text = text + '\n<b>Список возможных работ по задаче %s:</b>' % crm_num
+                        text, inline_kb = Helpers.gen_inline_kb(call_data, text)
+                    else:
+                        text = text + 'список пуст!'
+                else:
+                    text = 'Для начала необходимо выбрать задачу для работы'
+
             elif self.msg == 'Тест кабеля':
                 if self.user_id not in self.user_crm_info:
-                    text = 'Пожалуйста, для начала выберите пункт <b>"CRM"</b> ' \
-                           ' или <b>"Последняя в работе"</b>'
+                    text = 'Пожалуйста, для начала выберите пункт <b>"CRM"</b> '  # + ' или <b>"Последняя в работе"</b>'
                 else:
                     self.crm_number = self.user_crm_info[self.user_id]['crm_number']
                     res = BG.get_cable_test(self.crm_number, self.user_id)
@@ -335,8 +386,7 @@ class User:
 
             elif self.msg == 'История задачи':
                 if self.user_id not in self.user_crm_info:
-                    text = 'Пожалуйста, для начала выберите пункт <b>"CRM"</b> ' \
-                           ' или <b>"Последняя в работе"</b>'
+                    text = 'Пожалуйста, для начала выберите пункт <b>"CRM"</b> '  # + ' или <b>"Последняя в работе"</b>'
                 else:
                     self.crm_number = self.user_crm_info[self.user_id]['crm_number']
                     text = self.user_crm_info[self.user_id]['history'].replace('\n\n\n', '\n\n')
@@ -381,7 +431,7 @@ class User:
                     text = 'Данные не отравлены! \n<code>Код ошибки=[' + str(res['code']) + ']. '
             elif re.search(r'crm_(\d)*_task_done', self.msg) or self.prev_msg == 'Изменить статус':
                 text = '<code>Изменение статуса задачи</code>'
-            elif re.search(r'crm_(\d)*_task_(open|done|close)', self.prev_msg) and self.msg == 'Да':
+            elif re.search(r'crm_(\d)*_task_(open|done|close|suspend)', self.prev_msg) and self.msg == 'Да':
                 status = 'не определен!'
                 if re.search(r'open', self.prev_msg):
                     status = 'открыта'
@@ -389,6 +439,9 @@ class User:
                     status = 'выполнена'
                 elif re.search(r'close', self.prev_msg):
                     status = 'закрыта'
+                elif re.search(r'suspend', self.prev_msg):
+                    status = 'отложена'
+
                 crm_number = self.users_property('crm_number')
                 user = self.users_property('name')
                 res = BG.crm_ch_status(crm_number, status, user, self.user_id)
@@ -407,7 +460,7 @@ class User:
                 crm_num = self.users_property('crm_number')
                 if crm_num:
                     crm_url_list = BG.get_url_list(crm_num, self.user_id)
-                    if "type" in self.user_crm_info[self.user_id]['clean_data']:
+                    if self.user_crm_info and "type" in self.user_crm_info[self.user_id]['clean_data']:
                         try:
                             crm_type = config.crm_types[self.user_crm_info[self.user_id]['clean_data']['type']]
                             call_data = {}
@@ -459,7 +512,8 @@ class User:
                                        '<b>Тип:</b> %s\n' % crm_item['type'] + \
                                        '<b>Тема:</b> %s\n' % crm_item['subject'] + \
                                        '<b>Абонент:</b> %s\n' % crm_item['abonent'] + \
-                                       '<b>Адрес:</b> %s \n' % crm_item['адрес']
+                                       '<b>Адрес:</b> %s \n' % (
+                                           crm_item['адрес'] if 'адрес' in crm_item else 'не указан')
 
                         text = text + crm_data
                     else:
@@ -472,7 +526,7 @@ class User:
                 if crm_num:
                     # print(BG.get_checkpoint_list(crm_num))
                     checkpoint_list = BG.get_checkpoint_list(crm_num, self.user_id)
-                    text = 'Список доступных чек-поинтов \nпо задаче ' + '<b>' + crm_num + '</b>:\n'
+                    text = 'Список доступных чек-поинтов \nпо задаче <b>%s</b>:\n' % crm_num
                     call_data = dict(zip(checkpoint_list, checkpoint_list))
                     if not checkpoint_list:
                         text = text + 'список пуст!'

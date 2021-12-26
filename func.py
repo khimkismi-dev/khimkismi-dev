@@ -22,7 +22,6 @@ from local_user import User
 from local_bg import BG
 from local_db import DB, DBPsql
 
-
 # bg_config = copy.deepcopy(config.bg_config)
 db_config = config.db_config
 TOKEN = config.TOKEN
@@ -73,14 +72,40 @@ def echo(bot, update):
     # print(user.prev_msg)
     crm_number = user.users_property('crm_number')
     if user.crm_number and ((user.msg not in config.exclude_crm_action and user.msg in config.menu_items)
-                            or user.prev_msg in config.ch_host_list.keys()) and user.user_crm_info[user_id][
-        'clean_data'] != '':
+                            or user.prev_msg in config.ch_host_list.keys()) \
+            and user.user_crm_info[user_id]['clean_data'] != '':
         # print(user.user_crm_info[user_id]['clean_data']['description'])
         abon_phones = Helpers.get_abon_phones(user.user_crm_info[user_id]['clean_data'])
         Helpers.crm_main_actions(bot, chat_id, crm_number, abon_phones)
 
+        if 'type' in user.user_crm_info[user_id]['clean_data'] \
+                and user.user_crm_info[user_id]['clean_data']['type'] in config.custom_processing_type\
+                and user.user_crm_info[user_id]['clean_data']['subject'] == 'test':
+            func_name = config.custom_processing_type[user.user_crm_info[user_id]['clean_data']['type']]
+            getattr(Helpers, func_name)(bot, chat_id, reply_markup, crm_number)
+
     if user.msg == 'Активация' and user_id in user.user_crm_info:
         Helpers.yes_no_menu(bot, chat_id, '<code>Подтвердите выбор</code>')
+
+    elif re.search(r'add_work_(\d)*_(\d)', user.prev_msg) and Helpers.is_int(user.msg):
+        work_id = user.prev_msg.split('_')[2]
+        crm_num = user.prev_msg.split('_')[3]
+        count = user.msg
+        res = BG.add_work(crm_num, work_id, count, [str(user.users_property('bg_id'))], user.users_property('bg_id'),
+                          user_id)
+        if res['code'] == 0:
+            text = '<code>Работа по задаче %s успешно добавлена!</code>' % crm_num
+        else:
+            err_msg = ''
+            if 'message' in res:
+                err_msg = ':\n' + res['message']
+            text = 'Ошибка проставления работы по задаче %s <code>%s</code>!\n<code>Код ошибки=%s. \nОбратитесь к ' \
+                   'Администратору</code>' % (crm_num, err_msg, str(res['code']))
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+
+    elif re.search(r'add_work_(\d)*_(\d)', user.prev_msg) and not Helpers.is_int(user.msg):
+        text = '<code>Некорректный ввод кол-ва работ!</code>'
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
 
 # ф-ия, обработчик нажатий inline-кнопок
@@ -90,12 +115,12 @@ def callback_button(bot, update):
     call = update.callback_query
     user_id = call.from_user.id
     chat_id = call.message.chat.id
-    # print(call.data)
 
     Helpers.logger(user_id, call.data)
 
     user = User('users', user_id, chat_id, call.data)
     user.prev_msg = user.users_property('last_msg')
+
     user.users_property('last_msg', 'insert')
 
     # text, reply_markup = user.menu()
@@ -113,6 +138,11 @@ def callback_button(bot, update):
             text = '<code>Чек-поинт [' + user.msg + '] по задаче ' + str(crm_number) + ' проставлен!</code>'
         else:
             text = 'Ошибка: ' + res['message']
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+
+    elif re.search(r'add_work_(\d)*_(\d)', user.msg):
+        text = '<code>Для проставления выбранной работы по задаче</code> <b>%s</b> <code>введите кол-во работ (' \
+               'число).</code>' % (user.msg.split('_')[3])
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'multi_phones_(\d)*', user.msg):
@@ -192,7 +222,7 @@ def callback_button(bot, update):
         Helpers.yes_no_menu(bot, chat_id, text)
 
     elif user.prev_msg == 'Изменить статус' and user.msg:
-        if re.search(r'crm_(\d)*_task_(open|done|close)', user.msg):
+        if re.search(r'crm_(\d)*_task_(open|done|close|suspend)', user.msg):
             status = 'не определен!'
             if re.search(r'open', user.msg):
                 status = 'открыта'
@@ -200,6 +230,8 @@ def callback_button(bot, update):
                 status = 'выполнена'
             elif re.search(r'close', user.msg):
                 status = 'закрыта'
+            elif re.search(r'suspend', self.prev_msg):
+                status = 'отложена'
             text = 'Вы точно хотите поставить статус "' + status + '" для задачи ' + \
                    '<b>' + user.users_property('crm_number') + '</b>'
             Helpers.yes_no_menu(bot, chat_id, text)
@@ -252,22 +284,54 @@ def callback_button(bot, update):
             if crm_number:
                 res = BG.post_url_to_task(crm_number, user_id, url, description)
                 if res['code'] == 0:
-                    set_report_tag(bot, user, msg_type)
+                    key = next((k for k in config.processing_photo_list if config.processing_photo_list[k] == description), None)
+                    if key is None:
+                        bot.send_message(chat_id=user.chat_id, text='<code>ДОБАВЛЕНО</code>', parse_mode='HTML')
+                    else:
+                        bot.send_message(chat_id=chat_id, text='<code>Данные сохранены</code>', parse_mode='HTML')
+                        Helpers.unplug_processing(bot, chat_id, reply_markup, crm_number)
                 else:
                     text = res['message']
                     bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
             else:
                 text = '<code>Не выбрана задача для работы! Пожалуйста, сначала выберите пункт "CRM".</code>'
                 bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
+    elif re.search(r'processing_tree#(\d)*#(\d)', user.msg):
+        proc_list = user.msg.split('#')  # 'debt_processing_tree#%s#1.1'
+        processing_tree = proc_list[0]
+        crm_number = proc_list[1]
+        tree_queue = proc_list[2]
+        call_data = Helpers.tree_handler(processing_tree, tree_queue, crm_number)
+        if isinstance(call_data, str):
+            # if re.search(r'func_', call_data) and re.search('#CRM#', call_data, re.IGNORECASE):
+            #     call_data.replace('#CRM#', crm_number)
+            #     user.users_property('last_msg', 'insert', call_data)
 
+            if re.search(r'func_', call_data):
+                func_name = call_data
+                # user.users_property('last_msg', 'insert', func_name)
+                text = getattr(Helpers, call_data)(processing_tree, tree_queue)
 
+                if func_name == 'func_debt_processing_paid':
+                    pay_method = re.search(r'Метод оплаты:\s+(\w+)', text, re.IGNORECASE)[1]
+                    user.users_property('last_msg', 'insert', '%s#%s' % (func_name, pay_method))
+                else:
+                    user.users_property('last_msg', 'insert', func_name)
+            else:
+                text = 'действие не задано!'
+
+            bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+        else:
+            # print(call_data)
+            menu_col_count = 1 if len(call_data) >= 3 else len(call_data)
+            separator = '------------------'
+            text, reply_keyboard = Helpers.gen_inline_kb(call_data, '<code>%s\nВыберите действие:</code>' % separator,
+                                                         menu_col_count)
+            bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
+    # elif re.search(r'debt_processing_tree#(\d)*#(\d)', user.prev_msg):
+    #     pass
     else:
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
-
-
-def set_report_tag(bot, user, report_type):
-    text = '<code>ДОБАВЛЕНО</code>'
-    bot.send_message(chat_id=user.chat_id, text=text, parse_mode='HTML')
 
 
 def photo(bot, update):
@@ -293,6 +357,23 @@ def photo(bot, update):
         f_size = update.message.photo[len(update.message.photo) - 1].file_size
         query = """REPLACE INTO reports (user_id, teleg_file_id, filesize, url, description) \
         VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
+        db.sql_execute(query)
+
+        text = 'Вы хотите добавить данное фото в фотоотчет по задаче ' + '<b>' + user.users_property(
+            'crm_number') + '</b>?'
+        Helpers.yes_no_menu(bot, chat_id, text)
+
+    elif re.search(r'func_\w+_processing_add_photo', user.prev_msg):
+        try:
+            processing_type = re.search(r'func_(\w+)_processing_add_photo', user.prev_msg)[1]
+        except Exception:
+            processing_type = 'not found'
+        photo_name = config.processing_photo_list[processing_type]
+        db = DB(db_config)
+        f_id = update.message.photo[len(update.message.photo) - 1].file_id
+        f_size = update.message.photo[len(update.message.photo) - 1].file_size
+        query = """REPLACE INTO reports (user_id, teleg_file_id, filesize, url, description) \
+                VALUES (%d, '%s', %d, '%s', '%s')""" % (user_id, f_id, f_size, None, photo_name)
         db.sql_execute(query)
 
         text = 'Вы хотите добавить данное фото в фотоотчет по задаче ' + '<b>' + user.users_property(

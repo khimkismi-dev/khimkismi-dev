@@ -24,6 +24,65 @@ class BG(object):
         return Helpers.send_request(bg_config, endpoint, user_id)
 
     @staticmethod
+    # присваиваем данные, полученные из БГ (CRM), согласно ключам из шаблона + кастом
+    def crm_data_assign(crm_info, result, data, crm_num):
+        echo_tpl = config.crm_tpl
+        for key in echo_tpl:
+            if key in data:
+                mean = data[key]
+                if key == 'contract':
+                    tariffs = 'нет информации'
+                    if isinstance(data[key]['tariffs'], list):
+                        if len(data[key]['tariffs']) > 0:
+                            list_mean = []
+                            for item in data[key]['tariffs']:
+                                list_mean.append(', '.join(list(item.values())))
+                            tariffs = re.sub(r'( - )?\d{2,} руб/мес( - )?', r'', '; '.join(list_mean))
+                    # print(data[key])
+                    balance_modified = "положительный" if data[key]['balance'] >= 0 else "отрицательный"
+
+                    if data[key]['limit'] > data[key]['balance']:
+                        limit_modified = "отрицательный"
+                    elif data[key]['limit'] < data[key]['balance']:
+                        limit_modified = "положительный"
+                    else:
+                        limit_modified = "не установлен"
+                    mean = '\n   <b>Абонент:</b> ' + data['fio'] + '\n' + \
+                           '   <b>Номер договора:</b> ' + data[key]['title'] + '\n' + \
+                           '   <b>Тарифы:</b> ' + tariffs + '\n' + \
+                           '   <b>Баланс:</b> ' + balance_modified + '\n' + \
+                           '   <b>Лимит:</b> ' + limit_modified
+                if isinstance(mean, list):
+                    if len(mean) > 0:
+                        list_mean = []
+                        for item in mean:
+                            list_mean.append(', '.join(list(item.values())))
+                        mean = '; '.join(list_mean)
+                    else:
+                        mean = 'нет информации'
+            else:
+                mean = ''
+                if 'delimiter' not in str(key):
+                    mean = 'нет информации'
+            result['text'] = result['text'] + '<b>' + str(echo_tpl[key]) + '</b>' + str(mean) + '\n' + \
+                             ('\n' if str(key) not in ['delimiter1', 'description'] else '')
+        history = ['История по задаче ' + '<b>' + crm_num + '</b>:']
+        if isinstance(crm_info['data']['history'], list) and len(crm_info['data']['history']) > 0:
+            if len(crm_info['data']['history']) > config.history_max_length:
+                history_max_len = str(config.history_max_length)
+                history.append('<code>*** история задачи содержит более ' +
+                               history_max_len + ' сообщений.'
+                                                 '\nОтображено последних ' + history_max_len + ' ***</code>')
+            for item in crm_info['data']['history'][-config.history_max_length:]:
+                item_text = '<code>' + item['date'] + ' [' + item['user'] + ']' + '</code> ' + '\n' + item['text']
+                history.append(item_text)
+        else:
+            history.append('Пока нет ни одного сообщения ...')
+        result['history'] = '\n\n'.join(history)
+
+        return result
+
+    @staticmethod
     # полная информация по задаче
     def crm_info(crm_num, user_id):
         endpoint = '/api/?action=Task&taskId=' + str(crm_num)
@@ -56,59 +115,8 @@ class BG(object):
                 'group': crm_info['data']['group'] if 'group' in crm_info['data'] else 'не указана',
             }
 
-            echo_tpl = config.crm_tpl
-            for key in echo_tpl:
-                if key in data:
-                    mean = data[key]
-                    if key == 'contract':
-                        tariffs = 'нет информации'
-                        if isinstance(data[key]['tariffs'], list):
-                            if len(data[key]['tariffs']) > 0:
-                                list_mean = []
-                                for item in data[key]['tariffs']:
-                                    list_mean.append(', '.join(list(item.values())))
-                                tariffs = re.sub(r'( - )?\d{2,} руб/мес( - )?', r'', '; '.join(list_mean))
-                        # print(data[key])
-                        balance_modified = "положительный" if data[key]['balance'] >= 0 else "отрицательный"
+            result = BG.crm_data_assign(crm_info, result, data, crm_num)
 
-                        if data[key]['limit'] > data[key]['balance']:
-                            limit_modified = "отрицательный"
-                        elif data[key]['limit'] < data[key]['balance']:
-                            limit_modified = "положительный"
-                        else:
-                            limit_modified = "не установлен"
-                        mean = '\n   <b>Абонент:</b> ' + data['fio'] + '\n' + \
-                               '   <b>Номер договора:</b> ' + data[key]['title'] + '\n' + \
-                               '   <b>Тарифы:</b> ' + tariffs + '\n' + \
-                               '   <b>Баланс:</b> ' + balance_modified + '\n' + \
-                               '   <b>Лимит:</b> ' + limit_modified
-                    if isinstance(mean, list):
-                        if len(mean) > 0:
-                            list_mean = []
-                            for item in mean:
-                                list_mean.append(', '.join(list(item.values())))
-                            mean = '; '.join(list_mean)
-                        else:
-                            mean = 'нет информации'
-                else:
-                    mean = ''
-                    if 'delimiter' not in str(key):
-                        mean = 'нет информации'
-                result['text'] = result['text'] + '<b>' + str(echo_tpl[key]) + '</b>' + str(mean) + '\n' + \
-                                 ('\n' if str(key) not in ['delimiter1', 'description'] else '')
-            history = ['История по задаче ' + '<b>' + crm_num + '</b>:']
-            if isinstance(crm_info['data']['history'], list) and len(crm_info['data']['history']) > 0:
-                if len(crm_info['data']['history']) > config.history_max_length:
-                    history_max_len = str(config.history_max_length)
-                    history.append('<code>*** история задачи содержит более ' +
-                                   history_max_len + ' сообщений.'
-                                                     '\nОтображено последних ' + history_max_len + ' ***</code>')
-                for item in crm_info['data']['history'][-config.history_max_length:]:
-                    item_text = '<code>' + item['date'] + ' [' + item['user'] + ']' + '</code> ' + '\n' + item['text']
-                    history.append(item_text)
-            else:
-                history.append('Пока нет ни одного сообщения ...')
-            result['history'] = '\n\n'.join(history)
         else:
             result['text'] = crm_info['message']
 
@@ -212,4 +220,28 @@ class BG(object):
     # получение активных задач пользователя
     def get_active_tasks(user_id, bg_id):
         endpoint = '/api/?action=GetActiveTasks&userId=' + str(bg_id)
+        return Helpers.send_request(bg_config, endpoint, user_id)
+
+    @staticmethod
+    # получение списка работ по задаче
+    def get_work_list(crm_num, user_id):
+        endpoint = '/api/?action=WorkList&taskId=' + str(crm_num)
+
+        resp_data = Helpers.send_request(bg_config, endpoint, user_id)
+        work_list = {}
+        if 'data' in resp_data:
+            for item in resp_data['data']:
+                work_list[item['id']] = {
+                    'url': item['url'],
+                    'already_added': item['already_added'],
+                    'scores': item['scores']
+                }
+        return work_list
+
+    @staticmethod
+    # проставление работ по задаче
+    def add_work(crm_num, work_id, count, resp_ids, bg_id, user_id):
+        str_resp = ",".join(resp_ids)
+        endpoint = "/api/?action=WorkAdd&taskId=%s&wid=%s&count=%s&responsible=%s&userId=%d" % \
+                   (crm_num, work_id, count, str_resp, bg_id)
         return Helpers.send_request(bg_config, endpoint, user_id)

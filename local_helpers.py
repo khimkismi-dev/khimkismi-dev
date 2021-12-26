@@ -17,16 +17,19 @@ class Helpers(object):
 
     @staticmethod
     def get_abon_phones(data):
-        abonent_phones = data['phone']
-        for delimiter in config.phone_delimiters:
-            if data['phone'].find(delimiter) != -1:
-                abonent_phones = data['phone'].split(delimiter)
-                break
-        if not isinstance(abonent_phones, list):
-            try:
-                abonent_phones = data['phone'].split(',')
-            except AttributeError:
-                abonent_phones = ['']
+        if 'phone' in data:
+            abonent_phones = data['phone']
+            for delimiter in config.phone_delimiters:
+                if data['phone'].find(delimiter) != -1:
+                    abonent_phones = data['phone'].split(delimiter)
+                    break
+            if not isinstance(abonent_phones, list):
+                try:
+                    abonent_phones = data['phone'].split(',')
+                except AttributeError:
+                    abonent_phones = ['']
+        else:
+            abonent_phones = ['']
 
         abonent_phones = [str(phone) for phone in abonent_phones]
         abonent_phones = [re.sub(r'\D', '', phone) for phone in abonent_phones]
@@ -41,8 +44,8 @@ class Helpers(object):
             # , telegram.KeyboardButton('✏Изменить статус')
             [telegram.KeyboardButton('✔Чек-поинты'), telegram.KeyboardButton('🚀Активация')],
             [telegram.KeyboardButton('📜История задачи'), telegram.KeyboardButton('📷Фотоотчет')],
-            [telegram.KeyboardButton('⬅Последняя в работе'), telegram.KeyboardButton('📏Тест кабеля')],
-        ]
+            [telegram.KeyboardButton('🛠Добавить работы'), telegram.KeyboardButton('📏Тест кабеля')],
+        ]  # вместо ⬅Последняя в работе -> Добавить работы
 
     @staticmethod
     # выполнение запроса
@@ -87,6 +90,7 @@ class Helpers(object):
     # генерация inline-клавиатуры
     def gen_inline_kb(call_data, text='<code>Выберите из списка ниже:</code>', columns=1):  # bot, chat_id,
         # text = '<code>Выберите из списка ниже:</code>'
+        # print(call_data)
         tmp_kb = btn_list = []
         i = 0
         for key in call_data:
@@ -184,3 +188,111 @@ class Helpers(object):
             times_of_day = "Добрый вечер, "
 
         return times_of_day
+
+    @staticmethod
+    # проверка является ли целым числом
+    def is_int(num):
+        try:
+            int(num)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    # проверка является ли числом
+    def is_number(num):
+        try:
+            float(num)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def debt_processing(bot, chat_id, reply_markup, crm_number):
+        text = 'ТЕСТОВЫЙ РЕЖИМ!'
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+        call_data = Helpers.tree_handler('debt_processing_tree', '0', crm_number)
+        text, keyboard = Helpers.gen_inline_kb(call_data, '<code>Выберите действие:</code>', len(call_data))
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
+
+    @staticmethod
+    def func_debt_processing_paid(tree_name, tree_queue):
+        # print('from func_debt_processing_paid(): ')
+        # print(tree_queue)
+
+        items = Helpers.get_recursive(getattr(config, tree_name), tree_queue[:-4])  # 2 points back ex.: .1.1
+        pay_method = 'НЕ ОПРЕДЕЛЁН!'
+        # print('from func_debt_processing_paid(): ')
+        # print(items)
+        for item in items:
+            if tree_queue[-1:] == item[:1]:
+                pay_method = item[2:]
+        return 'Введи сумму оплаты в текстовую строку. Метод оплаты: %s' % pay_method
+
+    @staticmethod
+    def func_debt_processing_add_photo(tree_name, tree_queue):
+        return 'Отправь в чат фото оставленного уведомления'
+
+    @staticmethod
+    def unplug_processing(bot, chat_id, reply_markup, crm_number):
+        call_data = Helpers.tree_handler('unplug_processing_tree', '0', crm_number)
+        text, keyboard = Helpers.gen_inline_kb(call_data, '<code>Выберите действие:</code>', len(call_data))
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
+
+    @staticmethod
+    def func_unplug_processing_add_comment(tree_name, tree_queue):
+        return 'Введите комментарий по выбранному действию:'
+
+    @staticmethod
+    def func_unplug_processing_add_photo_success(tree_name, tree_queue):
+        return 'Отправьте фото бирки в чат'
+
+    @staticmethod
+    def func_unplug_processing_add_photo_unsuccess1(tree_name, tree_queue):
+        return 'Отправьте фото слаботочного щитка / фото обрезанного кабеля у входа в квартиру'
+
+    @staticmethod
+    def func_unplug_processing_add_photo_unsuccess2(tree_name, tree_queue):
+        return 'Отправьте фото закрытого объекта'
+
+    @staticmethod
+    def tree_handler(tree_name, tree_queue, crm_number):
+        # print(tree_queue)
+        actions_tree = getattr(config, tree_name)
+        # get buttons for current tree point
+        buttons = Helpers.get_recursive(actions_tree, tree_queue)
+
+        callback_keyboard = {}
+        if isinstance(buttons, str) and re.search(r'func_%s' % tree_name.replace('_tree', ''), buttons):
+            func_name = buttons
+            return func_name
+        for item in buttons:
+            btn_text = item[2:]
+            btn_callback = '%s#%s#%s' % (tree_name, crm_number, ('' if tree_queue == '0' else tree_queue + '.') + item[:1])
+            callback_keyboard[btn_text] = btn_callback
+        return callback_keyboard
+
+    @staticmethod
+    def get_recursive(tree, tree_queue):
+        if len(tree_queue) == 0:
+            return
+        elif tree_queue == '0':
+            return tree.keys()
+
+        point_list = tree_queue.split('.')
+        iter_cnt = len(point_list)
+
+        while iter_cnt >= 1:
+            iter_cnt = iter_cnt - 1
+            for key in tree.keys():
+                if key[0] == point_list[0]:
+                    tree_queue = tree_queue[2:]
+                    if len(tree_queue) == 0:
+                        try:
+                            res = tree[key].keys()
+                        except Exception:
+                            res = tree[key]
+                        return res
+                    if len(tree_queue) != 0:
+                        return Helpers.get_recursive(tree[key], tree_queue)
+
