@@ -134,7 +134,7 @@ def echo(update: Update, context: CallbackContext):
         badge_number = user.msg
         text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
                (badge_number, contract_id)
-        Helpers.yes_no_menu(bot, chat_id, text)
+        Helpers.yes_no_menu(context.bot, chat_id, text)
         # context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
 
