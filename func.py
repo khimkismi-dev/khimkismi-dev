@@ -296,7 +296,8 @@ def callback_button(update: Update, context: CallbackContext):
                     else:
                         txt = '<code>Данные сохранены</code>'
                         context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
-                        # Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
+                        if user.users_property('report') != 'unplug_badge':
+                            Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                 else:
                     text = res['message']
                     context.bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')

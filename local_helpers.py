@@ -241,8 +241,8 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def func_unplug_processing_add_comment(tree_name, tree_queue, additional_param):
-        return 'Введите комментарий по выбранному действию:'
+    def func_processing_add_comment(tree_name, tree_queue, additional_param):
+        return 'Укажите в комментарии:'
 
     # @staticmethod
     # def func_unplug_processing_add_photo_success(tree_name, tree_queue):
