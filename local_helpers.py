@@ -213,7 +213,9 @@ class Helpers(object):
         text = 'ТЕСТОВЫЙ РЕЖИМ!'
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         call_data = Helpers.tree_handler('debt_processing_tree', '0', crm_number)
-        text, keyboard = Helpers.gen_inline_kb(call_data, '<code>Выберите действие:</code>', len(call_data))
+        separator = '------------------'
+        txt = '<code>%s\nВыберите действие:</code>' % separator
+        text, keyboard = Helpers.gen_inline_kb(call_data, txt, len(call_data))
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
@@ -238,7 +240,9 @@ class Helpers(object):
     @staticmethod
     def unplug_processing(bot, chat_id, reply_markup, crm_number):
         call_data = Helpers.tree_handler('unplug_processing_tree', '0', crm_number)
-        text, keyboard = Helpers.gen_inline_kb(call_data, '<code>Выберите действие:</code>', len(call_data))
+        separator = '------------------'
+        txt = '<code>%s\nВыберите действие:</code>' % separator
+        text, keyboard = Helpers.gen_inline_kb(call_data, txt, len(call_data))
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
