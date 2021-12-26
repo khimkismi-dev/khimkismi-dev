@@ -318,6 +318,9 @@ def callback_button(update: Update, context: CallbackContext):
                 if len(data_list) > 1:
                     additional_param = data_list[1]
                 # user.users_property('last_msg', 'insert', func_name)
+                print(func_name)
+                print('\n')
+                print(additional_param)
                 text = getattr(Helpers, func_name)(processing_tree, tree_queue, additional_param)
 
                 if func_name == 'func_debt_processing_paid':
