@@ -312,7 +312,7 @@ def callback_button(update: Update, context: CallbackContext):
             #     user.users_property('last_msg', 'insert', call_data)
 
             if re.search(r'func_', call_data):
-                data_list = call_data.split('#')[0]
+                data_list = call_data.split('#')
                 func_name = data_list[0]
                 additional_param = ''
                 if len(data_list) > 1:
