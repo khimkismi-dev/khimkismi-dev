@@ -376,9 +376,9 @@ def callback_button(update: Update, context: CallbackContext):
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
     # elif re.search(r'debt_processing_tree#(\d)*#(\d)', user.prev_msg):
     #     pass
-    elif re.search(r'save_badge_number#(\d+)', user.msg):
-        text = 'Введите номер бирки'
-        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+    # elif re.search(r'save_badge_number#(\d+)', user.msg):
+    #     text = 'Введите номер бирки'
+    #     context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
         print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
