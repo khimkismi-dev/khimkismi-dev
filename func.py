@@ -296,7 +296,7 @@ def callback_button(update: Update, context: CallbackContext):
                     else:
                         txt = '<code>Данные сохранены</code>'
                         context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
-                        Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
+                        # Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                 else:
                     text = res['message']
                     context.bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
@@ -415,7 +415,7 @@ def photo(update: Update, context: CallbackContext):
         Helpers.yes_no_menu(context.bot, chat_id, text)
         if processing_type == 'unplug_badge':
             user.users_property('report', 'insert', processing_type)
-            text = 'также выберите действие:'
+            text = 'затем выберите действие:'
             call_data = {'Указать номер бирки': 'save_badge_number#%s' % user.users_property('crm_number')}
             text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
