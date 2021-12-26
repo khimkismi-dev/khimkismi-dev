@@ -247,7 +247,8 @@ class Helpers(object):
 
     @staticmethod
     def func_unplug_processing_finish(crm_number, data):
-        res = BG.crm_ch_resp(crm_number, data['responsible'], data['username'], data['user_id'])
+        user = data['user']
+        res = BG.crm_ch_resp(crm_number, data['responsible'], data['username'], user.user_id)
         if res['code'] == 0:
             text = 'Задача переведена на [%s]\n' % data['responsible']
         else:
@@ -255,11 +256,12 @@ class Helpers(object):
 
         # перевод задачи в статус "отложена"
         status = 'отложена'
-        res = BG.crm_ch_status(crm_number, status, data['username'], data['user_id'])
+        res = BG.crm_ch_status(crm_number, status, data['username'], user.user_id)
         if res['code'] == 0:
             text = text + 'Статус задачи <b>%s</b> изменен на <b>%s</b>\n' % (crm_number, status)
         else:
             text = text + '<b>Ошибка при изменении статуса задачи:</b> %s!\n' % res['message']
+        user.users_property('report', 'insert', ' ')
         return text
 
     @staticmethod
