@@ -28,7 +28,7 @@ TOKEN = config.TOKEN
 updater = Updater(token=TOKEN)  # , request_kwargs={'proxy_url': 'socks5://51.15.83.215:1080'}, workers=0) #proxy
 dispatcher = updater.dispatcher
 
-# test
+
 # обработчик /start
 def start(bot, update):
     # указываем отправленную пользователем команду для записи в лог
