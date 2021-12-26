@@ -136,3 +136,4 @@ logs
 reports/
 servicemans_dump.sql
 tests/
+.idea

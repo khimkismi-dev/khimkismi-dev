@@ -83,7 +83,8 @@ def echo(update: Update, context: CallbackContext):
 
         if 'type' in user.user_crm_info[user_id]['clean_data'] \
                 and user.user_crm_info[user_id]['clean_data']['type'] in config.custom_processing_type\
-                and user.user_crm_info[user_id]['clean_data']['subject'] == 'test':
+                and user.user_crm_info[user_id]['clean_data']['subject'] == 'test'\
+                and user.msg == 'CRM':
             func_name = config.custom_processing_type[user.user_crm_info[user_id]['clean_data']['type']]
             getattr(Helpers, func_name)(context.bot, chat_id, reply_markup, crm_number)
 
@@ -233,7 +234,7 @@ def callback_button(update: Update, context: CallbackContext):
                 status = 'выполнена'
             elif re.search(r'close', user.msg):
                 status = 'закрыта'
-            elif re.search(r'suspend', self.prev_msg):
+            elif re.search(r'suspend', user.msg):
                 status = 'отложена'
             text = 'Вы точно хотите поставить статус "' + status + '" для задачи ' + \
                    '<b>' + user.users_property('crm_number') + '</b>'
