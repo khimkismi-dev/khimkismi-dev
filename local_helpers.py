@@ -266,7 +266,7 @@ class Helpers(object):
         callback_keyboard = {}
         # print(buttons)
         if isinstance(buttons, str) and re.search(r'func_processing', buttons):
-            func_name = buttons.split('#')[0]
+            func_name = buttons
             return func_name
         for item in buttons:
             btn_text = item[2:]
