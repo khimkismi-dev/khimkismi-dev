@@ -74,7 +74,7 @@ def echo(update: Update, context: CallbackContext):
 
     text, reply_markup = user.menu()
 
-    if user.users_property('report').find("text") == -1:
+    if user.users_property('report') and user.users_property('report').find("text") == -1:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     # print(user.prev_msg)
