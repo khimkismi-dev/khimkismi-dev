@@ -238,6 +238,28 @@ class Helpers(object):
         return text
 
     @staticmethod
+    def func_processing_change_task_status(crm_number, user, user_id, status='выполнена'):
+        res = BG.crm_ch_status(crm_number, status, user, user_id)
+        if res['code'] == 0:
+            text = '<code>Статус задачи изменён на "%s"!</code>\n' % status
+        else:
+            text = '<b>Ошибка при переводе задачи:</b> %s!\n' % (res['message'] if 'message' in res.keys() else None)
+        return text
+
+    @staticmethod
+    def func_processing_save_badge_number(crm_number, user, bg_id, contract_id, badge_number):
+        user_id = user.user_id
+        res = BG.save_badge(crm_number, user_id, bg_id, contract_id, badge_number)
+        if res['code'] == 0:
+            text = '<code>Номер бирки сохранён!</code>\n'
+            user.users_property('report', 'insert', ' ')
+
+        else:
+            text = '<b>Ошибка сохранения номера бирки: %s!</b> Попробуйте повторить предыдущее действие\n' % \
+                   (res['message'] if 'message' in res.keys() else None)
+        return text
+
+    @staticmethod
     def unplug_processing(bot, chat_id, reply_markup, crm_number):
         call_data = Helpers.tree_handler('unplug_processing_tree', '0', crm_number)
         separator = '------------------'

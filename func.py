@@ -392,15 +392,11 @@ def callback_button(update: Update, context: CallbackContext):
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
             contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['id']
-        res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
+        # res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
         # print(res)
-        if res['code'] == 0:
-            text = '<code>Номер бирки сохранён!</code>'
-            user.users_property('report', 'insert', ' ')
-            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
-        else:
-            text = '<b>Ошибка сохранения номера бирки: %s!</b> Попробуйте повторить предыдущее действие' % res['message']
-            context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+        text = Helpers.func_processing_save_badge_number(crm_num, user, bg_id, contract_id, badge_number)
+        text = text + Helpers.func_processing_change_task_status(crm_num, user, user_id)  # status='выполнена'
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
     else:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
