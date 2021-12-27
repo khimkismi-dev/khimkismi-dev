@@ -330,7 +330,7 @@ def callback_button(update: Update, context: CallbackContext):
                         if not user.users_property('report') or user.users_property('report').find("unplug_") == -1:
                             Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                         if user.users_property('report') in ['unplug_not_connected', 'unplug_closed_object']:
-                            data = {'username': user.name, 'responsible': config.tech_department_supervisor, 'user': user}
+                            data = {'username': user.users_property('name'), 'responsible': config.tech_department_supervisor, 'user': user}
                             txt = Helpers.func_unplug_processing_finish(crm_number, data)
                             user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
                             context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
