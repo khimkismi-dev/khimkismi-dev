@@ -74,7 +74,8 @@ def echo(update: Update, context: CallbackContext):
 
     text, reply_markup = user.menu()
 
-    context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+    if 'unplug_' not in user.users_property('report'):
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     # print(user.prev_msg)
     crm_number = user.users_property('crm_number')
@@ -449,7 +450,7 @@ def photo(update: Update, context: CallbackContext):
         if processing_type in ['unplug_badge', 'unplug_not_connected', 'unplug_closed_object']:
             user.users_property('report', 'insert', processing_type)
         if processing_type == 'unplug_badge':
-            text = 'затем выберите действие:'
+            text = 'после подтверждения предыдущего действия выберите <b>"Указать номер бирки"</b>:'
             call_data = {'Указать номер бирки': 'save_badge_number#%s' % user.users_property('crm_number')}
             text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
             context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
