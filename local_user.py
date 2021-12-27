@@ -392,6 +392,8 @@ class User:
                 else:
                     self.crm_number = self.user_crm_info[self.user_id]['crm_number'] \
                         if self.user_id in self.user_crm_info.keys() else crm_number
+                    if self.user_id not in self.user_crm_info.keys():
+                        self.user_crm_info[self.user_id] = BG.crm_info(crm_number, self.user_id)
                     text = self.user_crm_info[self.user_id]['history'].replace('\n\n\n', '\n\n')
                     if text == '' or text is None:
                         text = 'История по задаче <b>{crm_number}</b> не найдена!'.format(crm_number=self.crm_number)
