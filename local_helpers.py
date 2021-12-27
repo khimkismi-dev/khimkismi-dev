@@ -239,7 +239,7 @@ class Helpers(object):
 
     @staticmethod
     def func_processing_change_task_status(crm_number, user, user_id, status='выполнена'):
-        res = BG.crm_ch_status(crm_number, status, user, user_id)
+        res = BG.crm_ch_status(crm_number, status, user.users_property('name'), user_id)
         if res['code'] == 0:
             text = '<code>Статус задачи изменён на "%s"!</code>\n' % status
         else:
