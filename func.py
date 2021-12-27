@@ -131,7 +131,7 @@ def echo(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'save_badge_number#(\d+)', user.prev_msg):
-        contract_id = user.user_crm_info[user_id]['clean_data']['contract']['title']
+        contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         badge_number = user.msg
         text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
                (badge_number, contract_id)
@@ -389,9 +389,9 @@ def callback_button(update: Update, context: CallbackContext):
         bg_id = user.users_property('bg_id')
         badge_number = user.msg
         try:
-            contract_id = user.user_crm_info[user_id]['clean_data']['contract']['title']
+            contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
-            contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['title']
+            contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['id']
         res = BG.save_badge(crm_num, user_id, bg_id, contract_id, badge_number)
         # print(res)
         if res['code'] == 0:
