@@ -307,6 +307,7 @@ class User:
                             crm_ch_status_res = BG.crm_ch_status(crm_number, 'выполнена', user_name, self.user_id)
                             if crm_ch_status_res['code'] == 0:
                                 text = text + '\n<code>Статус задачи %s изменен на "выполнена"</code>' % crm_number
+                            self.crm_number = crm_number
                             self.user_crm_info[self.user_id] = BG.crm_info(self.crm_number, self.user_id)
                             self.user_crm_info[self.user_id]['crm_number'] = self.crm_number
                         else:
@@ -394,6 +395,7 @@ class User:
                         if self.user_id in self.user_crm_info.keys() else crm_number
                     if self.user_id not in self.user_crm_info.keys():
                         self.user_crm_info[self.user_id] = BG.crm_info(crm_number, self.user_id)
+                        # print(self.user_crm_info)
                     text = self.user_crm_info[self.user_id]['history'].replace('\n\n\n', '\n\n')
                     if text == '' or text is None:
                         text = 'История по задаче <b>{crm_number}</b> не найдена!'.format(crm_number=self.crm_number)
