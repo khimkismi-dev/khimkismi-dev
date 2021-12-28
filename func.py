@@ -88,7 +88,6 @@ def echo(update: Update, context: CallbackContext):
 
         if 'type' in user.user_crm_info[user_id]['clean_data'] \
                 and user.user_crm_info[user_id]['clean_data']['type'] in config.custom_processing_type\
-                and user.user_crm_info[user_id]['clean_data']['subject'] == 'test'\
                 and (Helpers.is_int(user.msg) and user.prev_msg in config.ch_host_list.keys()):
             func_name = config.custom_processing_type[user.user_crm_info[user_id]['clean_data']['type']]
             getattr(Helpers, func_name)(context.bot, chat_id, reply_markup, crm_number)
