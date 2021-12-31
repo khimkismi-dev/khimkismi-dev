@@ -307,6 +307,13 @@ class User:
                             crm_ch_status_res = BG.crm_ch_status(crm_number, 'выполнена', user_name, self.user_id)
                             if crm_ch_status_res['code'] == 0:
                                 text = text + '\n<code>Статус задачи %s изменен на "выполнена"</code>' % crm_number
+                            else:
+                                text = text + '\n<b>Не удалось изменить статус задачи на "выполнена"!</b>'
+                            resp = BG.crm_set_checkpoint(crm_number, config.done_checkpoint, user_name, self.user_id)
+                            if resp['code'] == 0:
+                                text = text + '\n<code>Проставлен чек-поинт "%s"</code>' % config.done_checkpoint
+                            else:
+                                text = text + '\n<b>Не удалось проставить чекпоинт "%s"!</b>' % config.done_checkpoint
                             self.crm_number = crm_number
                             self.user_crm_info[self.user_id] = BG.crm_info(self.crm_number, self.user_id)
                             self.user_crm_info[self.user_id]['crm_number'] = self.crm_number

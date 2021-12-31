@@ -329,8 +329,12 @@ def callback_button(update: Update, context: CallbackContext):
                         if not user.users_property('report') or user.users_property('report').find("unplug_") == -1:
                             Helpers.unplug_processing(context.bot, chat_id, reply_markup, crm_number)
                         if user.users_property('report') in ['unplug_not_connected', 'unplug_closed_object']:
+                            # add comment to history
+                            comment = config.processing_photo_list[user.users_property('report')]['comment']
+                            txt = BG.crm_add_comment(crm_number, comment, user.users_property('name'), user_id)
+
                             data = {'username': user.users_property('name'), 'responsible': config.tech_department_supervisor, 'user': user}
-                            txt = Helpers.func_unplug_processing_finish(crm_number, data)
+                            txt = txt + Helpers.func_unplug_processing_finish(crm_number, data)
                             user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
                             context.bot.send_message(chat_id=chat_id, text=txt, parse_mode='HTML')
                 else:
@@ -394,7 +398,15 @@ def callback_button(update: Update, context: CallbackContext):
             contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['id']
 
         text = Helpers.func_processing_save_badge_number(crm_num, user, bg_id, contract_id, badge_number)
-        text = text + Helpers.func_processing_change_task_status(crm_num, user, user_id)  # status='выполнена'
+
+        # text = text + Helpers.func_processing_change_task_status(crm_num, user, user_id)  # status='выполнена'
+
+        resp_unplug_finish = BG.debtor_unplug(crm_num, bg_id, user_id)
+        if resp_unplug_finish['code'] == 0:
+            text = text + BG.debtor_unplug(crm_num, bg_id, user_id)
+        else:
+            text = text + '<b>ВНИМАНИЕ:</b> Не удалось завершить задачу! Попробуйте повторить предыдущее действие!'
+
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
         # TODO: do autorefresh crm history data after add comment

@@ -252,3 +252,9 @@ class BG(object):
         endpoint = "/api/?action=SetTagNumber&userId=%s&cid=%s&tagNumber=%s" % \
                    (bg_id, contract_id, badge_number)
         return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
+
+    @staticmethod
+    # отключение должника
+    def debtor_unplug(crm_num, bg_id, user_id):
+        endpoint = "/api/?action=DebtorUnplug&taskId=%s&userId=%s" % (crm_num, bg_id)
+        return local_helpers.Helpers.send_request(bg_config, endpoint, user_id)
