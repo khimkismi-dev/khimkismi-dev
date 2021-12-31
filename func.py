@@ -67,6 +67,8 @@ def echo(update: Update, context: CallbackContext):
     user.users_property('last_msg', 'insert')
     # print(user.user_state())
 
+    crm_number = user.users_property('crm_number')
+
     # print(user.msg)
     if user.msg == 'Тест кабеля' and user_id in user.user_crm_info:
         text = '<code>Пожалуйста, подождите. \nВыполняется тестирование кабеля...</code>'
@@ -78,7 +80,6 @@ def echo(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     # print(user.prev_msg)
-    crm_number = user.users_property('crm_number')
     if user.crm_number and ((user.msg not in config.exclude_crm_action and user.msg in config.menu_items)
                             or user.prev_msg in config.ch_host_list.keys()) \
             and user.user_crm_info[user_id]['clean_data'] != '':
@@ -116,7 +117,6 @@ def echo(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'func_processing_add_comment', user.prev_msg):
-        crm_number = user.users_property('crm_number')
         to_history = user.msg
         res = BG.crm_add_comment(crm_number, to_history, user.users_property('name'), user_id)
         if res['code'] == 0:
@@ -131,7 +131,10 @@ def echo(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'save_badge_number#(\d+)', user.prev_msg):
-        contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
+        try:
+            contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
+        except Exception:
+            contract_id = BG.crm_info(crm_number, user_id)['data']['contract']['id']
         badge_number = user.msg
         text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
                (badge_number, contract_id)
@@ -161,9 +164,9 @@ def callback_button(update: Update, context: CallbackContext):
     # context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     text, reply_markup = user.menu()
+    crm_number = user.users_property('crm_number')
 
     if user.prev_msg == 'Чек-поинты' and user.msg not in config.menu_items:
-        crm_number = user.users_property('crm_number')
         user_name = user.users_property('name')
         res = BG.crm_set_checkpoint(crm_number, user.msg, user_name, user_id)
         # print(res)
@@ -230,13 +233,9 @@ def callback_button(update: Update, context: CallbackContext):
     elif re.search(r'crm_(\d)*_task_delegate', user.prev_msg) and user.msg not in ['Да', 'Нет']:
         group_list = BG.get_group_list(user_id)
         if user.msg in group_list:
-            text = 'Вы точно хотите перевести задачу ' + \
-                   '<b>' + user.users_property('crm_number') + '</b> ' \
-                                                               'на группу ' + '<b>' + user.msg + '</b> '
+            text = 'Вы точно хотите перевести задачу <b>%s</b> на группу <b>%s</b>? ' % (crm_number, user.msg)
         else:
-            text = 'Вы точно хотите назначить ответственным ' + '<b>' + user.msg + '</b>' \
-                                                                                   ' по задаче ' + '<b>' + user.users_property(
-                'crm_number') + '</b> '
+            text = 'Вы точно хотите назначить ответственным <b>%s</b> по задаче <b>%s</b>?' % (user.msg, crm_number)
         Helpers.yes_no_menu(context.bot, chat_id, text)
 
     # elif re.search(r'crm_(\d)*_report_photo_(\d)', user.msg):
@@ -250,8 +249,7 @@ def callback_button(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
     elif re.search(r'crm_(\d)*_task_done', user.msg):
-        text = 'Вы точно хотите поставить статус "выполнена" для задачи ' + \
-               '<b>' + user.users_property('crm_number') + '</b>'
+        text = 'Вы точно хотите поставить статус "выполнена" для задачи <b>%s</b>' % crm_number
         Helpers.yes_no_menu(context.bot, chat_id, text)
 
     elif user.prev_msg == 'Изменить статус' and user.msg:
@@ -265,8 +263,7 @@ def callback_button(update: Update, context: CallbackContext):
                 status = 'закрыта'
             elif re.search(r'suspend', user.msg):
                 status = 'отложена'
-            text = 'Вы точно хотите поставить статус "' + status + '" для задачи ' + \
-                   '<b>' + user.users_property('crm_number') + '</b>'
+            text = 'Вы точно хотите поставить статус "%s" для задачи <b>%s</b>?' % (status, crm_number)
             Helpers.yes_no_menu(context.bot, chat_id, text)
 
     elif user.prev_msg == 'CRM' and user.msg in config.ch_host_list.keys():
@@ -302,7 +299,6 @@ def callback_button(update: Update, context: CallbackContext):
             (dirName, file_name) = os.path.split(file.file_path)
             file_name = str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")) + '_' + file_name
             servername = user.users_property('bg_servername')
-            crm_number = user.users_property('crm_number')
             folder_path = config.bot_folder + 'reports/' + config.report_provider_folders[servername] + '/' + \
                           str(crm_number) + '/'
             if not path.exists(folder_path):
@@ -343,6 +339,7 @@ def callback_button(update: Update, context: CallbackContext):
             else:
                 text = '<code>Не выбрана задача для работы! Пожалуйста, сначала выберите пункт "CRM".</code>'
                 context.bot.send_message(chat_id=chat_id, text=text, parse_mode='HTML')
+
     elif re.search(r'processing_tree#(\d)*#(\d)', user.msg):
         proc_list = user.msg.split('#')  # 'debt_processing_tree#%s#1.1'
         processing_tree = proc_list[0]
@@ -389,19 +386,19 @@ def callback_button(update: Update, context: CallbackContext):
 
     elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
         # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
-        crm_num = user.users_property('crm_number')
+        # crm_num = user.users_property('crm_number')
         bg_id = user.users_property('bg_id')
         badge_number = user.msg
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
-            contract_id = BG.crm_info(crm_num, user_id)['data']['contract']['id']
+            contract_id = BG.crm_info(crm_number, user_id)['data']['contract']['id']
 
-        text = Helpers.func_processing_save_badge_number(crm_num, user, bg_id, contract_id, badge_number)
+        text = Helpers.func_processing_save_badge_number(crm_number, user, bg_id, contract_id, badge_number)
 
         # text = text + Helpers.func_processing_change_task_status(crm_num, user, user_id)  # status='выполнена'
 
-        resp_unplug_finish = BG.debtor_unplug(crm_num, bg_id, user_id)
+        resp_unplug_finish = BG.debtor_unplug(crm_number, bg_id, user_id)
         if resp_unplug_finish['code'] == 0:
             text = text + '<code>Задача завершена. Баллы и чек-поинты проставлены.</code>'
         else:
@@ -410,7 +407,7 @@ def callback_button(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
         # TODO: do autorefresh crm history data after add comment
-        user.user_crm_info[user_id] = BG.crm_info(crm_num, user_id)
+        user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
     else:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
