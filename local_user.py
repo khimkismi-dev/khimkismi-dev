@@ -296,24 +296,22 @@ class User:
                     paid_sum = self.msg.replace(',', '.')
                     # print('paid_sum=%s\n' % paid_sum)
                     # print(self.prev_msg)
+                    user_name = self.users_property('name')
+                    crm_number = self.users_property('crm_number')
+                    
                     try:
-                        user_name = self.users_property('name')
-                        crm_number = self.users_property('crm_number')
                         pay_method = re.search(r'func_processing_debt_paid#(.+)', self.prev_msg)[1]
                         comment = 'Оплачено: %s\nСпособ оплаты: %s\n' % (paid_sum, pay_method)
                         crm_add_comment_res = BG.crm_add_comment(crm_number, comment, user_name, self.user_id)
                         if crm_add_comment_res['code'] == 0:
                             text = '<code>В задачу %s Добавлен комментарий: </code>\n%s' % (crm_number, comment)
+
                             crm_ch_status_res = BG.crm_ch_status(crm_number, 'выполнена', user_name, self.user_id)
                             if crm_ch_status_res['code'] == 0:
                                 text = text + '\n<code>Статус задачи %s изменен на "выполнена"</code>' % crm_number
                             else:
                                 text = text + '\n<b>Не удалось изменить статус задачи на "выполнена"!</b>'
-                            resp = BG.crm_set_checkpoint(crm_number, config.done_checkpoint, user_name, self.user_id)
-                            if resp['code'] == 0:
-                                text = text + '\n<code>Проставлен чек-поинт "%s"</code>' % config.done_checkpoint
-                            else:
-                                text = text + '\n<b>Не удалось проставить чекпоинт "%s"!</b>' % config.done_checkpoint
+
                             self.crm_number = crm_number
                             self.user_crm_info[self.user_id] = BG.crm_info(self.crm_number, self.user_id)
                             self.user_crm_info[self.user_id]['crm_number'] = self.crm_number
@@ -321,6 +319,12 @@ class User:
                             text = '<code>Ошибка добавления комментария: %s</code>' % crm_add_comment_res['message']
                     except Exception:
                         text = '<code>Не определен способ оплаты!</code>'
+
+                    resp = BG.crm_set_checkpoint(crm_number, config.done_checkpoint, user_name, self.user_id)
+                    if resp['code'] == 0:
+                        text = text + '\n<code>Проставлен чек-поинт "%s"</code>' % config.done_checkpoint
+                    else:
+                        text = text + '\n<b>Не удалось проставить чекпоинт "%s"!</b>' % config.done_checkpoint
                 else:
                     text = '<b>Некорректный ввод!</b>\n' \
                            '<code>Попробуйте выбрать предыдущее действие и повторить ввод заново!</code>'
