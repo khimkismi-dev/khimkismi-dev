@@ -134,9 +134,9 @@ def echo(update: Update, context: CallbackContext):
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
-            bg_resp = BG.crm_info(crm_number, user_id)
-            print(bg_resp)
-            contract_id = BG.crm_info(crm_number, user_id)['data']['contract']['id']
+            # bg_resp = BG.crm_info(crm_number, user_id)
+            # print(bg_resp)
+            contract_id = BG.crm_info(crm_number, user_id)['clean_data']['contract']['id']
         badge_number = user.msg
         text = 'Вы точно хотите сохранить номер <b>%s</b> в качестве номера бирки для договора <b>%s</b>?' % \
                (badge_number, contract_id)
@@ -394,7 +394,7 @@ def callback_button(update: Update, context: CallbackContext):
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
-            contract_id = BG.crm_info(crm_number, user_id)['data']['contract']['id']
+            contract_id = BG.crm_info(crm_number, user_id)['clean_data']['contract']['id']
 
         text = Helpers.func_processing_save_badge_number(crm_number, user, bg_id, contract_id, badge_number)
 
