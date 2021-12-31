@@ -298,7 +298,7 @@ class User:
                     # print(self.prev_msg)
                     user_name = self.users_property('name')
                     crm_number = self.users_property('crm_number')
-                    
+
                     try:
                         pay_method = re.search(r'func_processing_debt_paid#(.+)', self.prev_msg)[1]
                         comment = 'Оплачено: %s\nСпособ оплаты: %s\n' % (paid_sum, pay_method)

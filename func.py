@@ -403,7 +403,7 @@ def callback_button(update: Update, context: CallbackContext):
 
         resp_unplug_finish = BG.debtor_unplug(crm_num, bg_id, user_id)
         if resp_unplug_finish['code'] == 0:
-            text = text + BG.debtor_unplug(crm_num, bg_id, user_id)
+            text = text + '<code>Задача завершена. Баллы и чек-поинты проставлены.</code>'
         else:
             text = text + '<b>ВНИМАНИЕ:</b> Не удалось завершить задачу! Попробуйте повторить предыдущее действие!'
 
