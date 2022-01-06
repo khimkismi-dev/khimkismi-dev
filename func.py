@@ -390,7 +390,7 @@ def callback_button(update: Update, context: CallbackContext):
         # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
         # crm_num = user.users_property('crm_number')
         bg_id = user.users_property('bg_id')
-        badge_number = user.msg
+        badge_number = user.prev_msg
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
         except Exception:
