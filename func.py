@@ -68,6 +68,7 @@ def echo(update: Update, context: CallbackContext):
     # print(user.user_state())
 
     crm_number = user.users_property('crm_number')
+    # print(crm_number)
 
     # print(user.msg)
     if user.msg == 'Тест кабеля' and user_id in user.user_crm_info:
@@ -84,6 +85,7 @@ def echo(update: Update, context: CallbackContext):
                             or user.prev_msg in config.ch_host_list.keys()) \
             and user.user_crm_info[user_id]['clean_data'] != '':
         # print(user.user_crm_info[user_id]['clean_data']['description'])
+        crm_number = user.crm_number
         abon_phones = Helpers.get_abon_phones(user.user_crm_info[user_id]['clean_data'])
         Helpers.crm_main_actions(context.bot, chat_id, crm_number, abon_phones)
 
