@@ -287,6 +287,12 @@ class User:
                     self.user_crm_info[self.user_id]['crm_number'] = self.crm_number
                     host_str = '<code>(Провайдер: %s)</code>\n' % \
                                (config.provider_names[config.ch_host_list[self.prev_msg]])
+
+                    khimki_bg_user = BG.check_mail(self.email, self.user_id)
+                    if khimki_bg_user['code'] == 0:
+                        khimki_bg_id = khimki_bg_user['data']['id']
+                        self.users_property('khimki_bg_id', 'insert', khimki_bg_id)
+
                     text = host_str + self.user_crm_info[self.user_id]['text']
                 else:
                     text = 'Некорректный ввод, попробуйте заново!'
