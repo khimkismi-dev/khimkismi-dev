@@ -406,7 +406,11 @@ def callback_button(update: Update, context: CallbackContext):
         if resp_unplug_finish['code'] == 0:
             text = text + '<code>Задача завершена. Баллы и чек-поинты проставлены.</code>'
         else:
-            text = text + '<b>ВНИМАНИЕ:</b> Не удалось завершить задачу! Попробуйте повторить предыдущее действие!'
+            add_err_msg = ''
+            if "message" in resp_unplug_finish:
+                add_err_msg = '<b>Ошибка: %s</b>' % resp_unplug_finish['message']
+            text = text + '<b>ВНИМАНИЕ:</b> Не удалось завершить задачу! Попробуйте повторить предыдущее действие!' + add_err_msg
+            # text = text + '<b>ВНИМАНИЕ:</b> Не удалось завершить задачу! Попробуйте повторить предыдущее действие!'
 
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
