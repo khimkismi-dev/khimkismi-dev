@@ -256,6 +256,12 @@ class User:
 
         return result
 
+    def get_bg_id(self):
+        if config.provider_names[self.users_property('bg_servername')] == 'ХимкиСМИ':
+            return self.users_property('khimki_bg_id')
+        else:
+            return self.users_property('bg_id')
+
     # возвращает клавиатуру меню
     def menu(self):
         # список кнопок
@@ -519,7 +525,7 @@ class User:
                     text = 'Для начала необходимо выбрать задачу для работы'
 
             elif self.msg == 'Мои задачи':
-                bg_id = self.users_property('bg_id')
+                bg_id = self.get_bg_id()  # self.users_property('bg_id')
                 res = BG.get_active_tasks(self.user_id, bg_id)
                 if res['code'] == 0:
                     if res['data']:

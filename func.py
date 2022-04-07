@@ -102,7 +102,7 @@ def echo(update: Update, context: CallbackContext):
         work_id = user.prev_msg.split('_')[2]
         crm_num = user.prev_msg.split('_')[3]
         count = user.msg
-        res = BG.add_work(crm_num, work_id, count, [str(user.users_property('bg_id'))], user.users_property('bg_id'),
+        res = BG.add_work(crm_num, work_id, count, [str(user.get_bg_id())], user.get_bg_id(),
                           user_id)
         if res['code'] == 0:
             text = '<code>Работа по задаче %s успешно добавлена!</code>' % crm_num
@@ -391,7 +391,7 @@ def callback_button(update: Update, context: CallbackContext):
     elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
         # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
         # crm_num = user.users_property('crm_number')
-        bg_id = user.users_property('bg_id')
+        bg_id = user.get_bg_id()  # user.users_property('bg_id')
         badge_number = user.prev_msg
         try:
             contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
