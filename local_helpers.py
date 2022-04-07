@@ -61,7 +61,7 @@ class Helpers(object):
             if len(bg_servername) > 0:
                 server = server_cfg['server'].replace(config.default_host, bg_servername[0])
             url = server + endpoint
-            print(url)
+            # print(url)
             if send_data['method'] == 'post':
                 auth = HTTPBasicAuth(server_cfg['user'], server_cfg['pass'])
                 # print(send_data['body'])
