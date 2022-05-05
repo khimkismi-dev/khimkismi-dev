@@ -219,7 +219,7 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def plug_ktv_debt_processing(bot, chat_id, reply_markup, crm_number):
+    def plug_ktv_processing(bot, chat_id, reply_markup, crm_number):
         separator = '------------------'
         text = '<code>%s\nВыберите действие:</code>' % separator
         call_data = {'Указать номер бирки': 'save_badge_number#%s' % crm_number}
