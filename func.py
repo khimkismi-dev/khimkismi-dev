@@ -93,7 +93,7 @@ def echo(update: Update, context: CallbackContext):
                 and user.user_crm_info[user_id]['clean_data']['type'] in config.custom_processing_type\
                 and (Helpers.is_int(user.msg) and user.prev_msg in config.ch_host_list.keys()):
             func_name = config.custom_processing_type[user.user_crm_info[user_id]['clean_data']['type']]
-            getattr(Helpers, func_name)(context.bot, chat_id, reply_markup, crm_number)
+            getattr(Helpers, func_name)(context.bot, chat_id, reply_markup, crm_number, user)
 
     if user.msg == 'Активация' and user_id in user.user_crm_info:
         Helpers.yes_no_menu(context.bot, chat_id, '<code>Подтвердите выбор</code>')

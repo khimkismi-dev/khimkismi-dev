@@ -209,7 +209,7 @@ class Helpers(object):
             return False
 
     @staticmethod
-    def debt_processing(bot, chat_id, reply_markup, crm_number):
+    def debt_processing(bot, chat_id, reply_markup, crm_number, user=None):
         # text = 'ТЕСТОВЫЙ РЕЖИМ!'
         # bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
         call_data = Helpers.tree_handler('debt_processing_tree', '0', crm_number)
@@ -219,7 +219,7 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
-    def plug_ktv_processing(bot, chat_id, reply_markup, crm_number):
+    def plug_ktv_processing(bot, chat_id, reply_markup, crm_number, user=None):
         separator = '------------------'
         text = '<code>%s\nВыберите действие:</code>' % separator
         call_data = {'Указать номер бирки': 'save_badge_number#%s' % crm_number}
@@ -271,7 +271,7 @@ class Helpers(object):
         return text
 
     @staticmethod
-    def unplug_processing(bot, chat_id, reply_markup, crm_number):
+    def unplug_processing(bot, chat_id, reply_markup, crm_number, user=None):
         call_data = Helpers.tree_handler('unplug_processing_tree', '0', crm_number)
         separator = '------------------'
         txt = '<code>%s\nВыберите действие:</code>' % separator
