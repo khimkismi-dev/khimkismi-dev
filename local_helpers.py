@@ -224,6 +224,9 @@ class Helpers(object):
         text = '<code>%s\nВыберите действие:</code>' % separator
         call_data = {'Указать номер бирки': 'save_badge_number#%s' % crm_number}
         text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
+
+        user.users_property('report', 'insert', 'ktv_plug_badge')
+
         bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
 
     @staticmethod
