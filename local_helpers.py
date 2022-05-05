@@ -219,6 +219,14 @@ class Helpers(object):
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode='HTML')
 
     @staticmethod
+    def plug_ktv_debt_processing(bot, chat_id, reply_markup, crm_number):
+        separator = '------------------'
+        text = '<code>%s\nВыберите действие:</code>' % separator
+        call_data = {'Указать номер бирки': 'save_badge_number#%s' % crm_number}
+        text, reply_keyboard = Helpers.gen_inline_kb(call_data, text)
+        bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_keyboard, parse_mode='HTML')
+
+    @staticmethod
     def func_processing_debt_paid(tree_name, tree_queue, additional_param):
         # print('from func_processing_debt_paid(): ')
         # print(tree_queue)
@@ -344,3 +352,11 @@ class Helpers(object):
                     if len(tree_queue) != 0:
                         return Helpers.get_recursive(tree[key], tree_queue)
 
+    @staticmethod
+    def get_contract_id(user, crm_number):
+        try:
+            contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
+        except Exception:
+            contract_id = BG.crm_info(crm_number, user_id)['clean_data']['contract']['id']
+
+        return contract_id
