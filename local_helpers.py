@@ -355,8 +355,8 @@ class Helpers(object):
     @staticmethod
     def get_contract_id(user, crm_number):
         try:
-            contract_id = user.user_crm_info[user_id]['clean_data']['contract']['id']
+            contract_id = user.user_crm_info[user.user_id]['clean_data']['contract']['id']
         except Exception:
-            contract_id = BG.crm_info(crm_number, user_id)['clean_data']['contract']['id']
+            contract_id = BG.crm_info(crm_number, user.user_id)['clean_data']['contract']['id']
 
         return contract_id
