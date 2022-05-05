@@ -383,8 +383,7 @@ def callback_button(update: Update, context: CallbackContext):
         text = 'Введите номер бирки'
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
-    elif user.msg == 'Да' and (user.users_property('report') == 'unplug_badge' or
-                               user.users_property('report') == 'ktv_plug_badge'):
+    elif user.msg == 'Да' and user.users_property('report') == 'unplug_badge':
         # print("from user.users_property('report') == 'unplug_badge'" + user.prev_msg)
         # crm_num = user.users_property('crm_number')
         bg_id = user.get_bg_id()  # user.users_property('bg_id')
@@ -410,6 +409,16 @@ def callback_button(update: Update, context: CallbackContext):
 
         # TODO: do autorefresh crm history data after add comment
         user.user_crm_info[user_id] = BG.crm_info(crm_number, user_id)
+
+    elif user.msg == 'Да' and user.users_property('report') == 'ktv_plug_badge':
+        bg_id = user.get_bg_id()  # user.users_property('bg_id')
+        badge_number = user.prev_msg
+
+        contract_id = Helpers.get_contract_id(user, crm_number)
+
+        text = Helpers.func_processing_save_badge_number(crm_number, user, bg_id, contract_id, badge_number)
+        context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
+
     else:
         context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup, parse_mode='HTML')
 
